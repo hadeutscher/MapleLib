@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -28,12 +29,35 @@ namespace MapleLib.Helpers
         {
             errorList.Add(new Error(level, message));
         }
+
+        public static bool ErrorsPresent()
+        {
+            return errorList.Count > 0;
+        }
+
+        public static void ClearErrors()
+        {
+            errorList.Clear();
+        }
+
+        public static void SaveToFile(string filename)
+        {
+            using (StreamWriter sw = new StreamWriter(File.Open(filename, FileMode.Append, FileAccess.Write, FileShare.Read)))
+            {
+                sw.WriteLine("Starting error log on " + DateTime.Today.ToShortDateString());
+                foreach (Error e in errorList) 
+                {
+                    sw.WriteLine(e.level.ToString() + ":" + e.message);
+                }
+                sw.WriteLine();
+            }
+        }
     }
 
-    internal class Error
+    public class Error
     {
-        private ErrorLevel level;
-        private string message;
+        internal ErrorLevel level;
+        internal string message;
 
         internal Error(ErrorLevel level, string message)
         {
