@@ -22,11 +22,11 @@ namespace MapleLib.WzLib.WzProperties
 	/// <summary>
 	/// A property that's value is null
 	/// </summary>
-	public class WzNullProperty : IWzImageProperty
+	public class WzNullProperty : WzImageProperty
 	{
 		#region Fields
 		internal string name;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -36,7 +36,7 @@ namespace MapleLib.WzLib.WzProperties
             throw new System.NotImplementedException();
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzNullProperty clone = (WzNullProperty)MemberwiseClone();
             return clone;
@@ -45,7 +45,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>

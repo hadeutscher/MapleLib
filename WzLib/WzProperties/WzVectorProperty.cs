@@ -22,12 +22,12 @@ namespace MapleLib.WzLib.WzProperties
 	/// <summary>
 	/// A property that contains an x and a y value
 	/// </summary>
-	public class WzVectorProperty : IExtended
+	public class WzVectorProperty : WzExtended
 	{
 		#region Fields
 		internal string name;
-		internal WzCompressedIntProperty x, y;
-		internal IWzObject parent;
+		internal WzIntProperty x, y;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -46,11 +46,11 @@ namespace MapleLib.WzLib.WzProperties
             }
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzVectorProperty clone = (WzVectorProperty)MemberwiseClone();
-            clone.x = (WzCompressedIntProperty)x.DeepClone();
-            clone.y = (WzCompressedIntProperty)y.DeepClone();
+            clone.x = (WzIntProperty)x.DeepClone();
+            clone.y = (WzIntProperty)y.DeepClone();
             return clone;
         }
 
@@ -58,7 +58,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>
@@ -99,11 +99,11 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The X value of the Vector2D
 		/// </summary>
-		public WzCompressedIntProperty X { get { return x; } set { x = value; } }
+		public WzIntProperty X { get { return x; } set { x = value; } }
 		/// <summary>
 		/// The Y value of the Vector2D
 		/// </summary>
-		public WzCompressedIntProperty Y { get { return y; } set { y = value; } }
+		public WzIntProperty Y { get { return y; } set { y = value; } }
 		/// <summary>
 		/// The Point of the Vector2D created from the X and Y
 		/// </summary>
@@ -126,7 +126,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <param name="name">The name of the property</param>
 		/// <param name="x">The x value of the vector</param>
 		/// <param name="y">The y value of the vector</param>
-		public WzVectorProperty(string name, WzCompressedIntProperty x, WzCompressedIntProperty y)
+		public WzVectorProperty(string name, WzIntProperty x, WzIntProperty y)
 		{
 			this.name = name;
 			this.x = x;
@@ -135,7 +135,7 @@ namespace MapleLib.WzLib.WzProperties
 		#endregion
 
         #region Cast Values
-        internal override System.Drawing.Point ToPoint(System.Drawing.Point def)
+        public override System.Drawing.Point GetPoint()
         {
             return new System.Drawing.Point(x.val, y.val);
         }

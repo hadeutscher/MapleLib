@@ -27,9 +27,9 @@ namespace MapleLib.WzLib.WzStructure
 {
     public static class InfoTool
     {
-        public static string GetString(IWzImageProperty source)
+        public static string GetString(WzImageProperty source)
         {
-            return ((WzStringProperty)source).Value;
+            return source.GetString();
         }
 
         public static WzStringProperty SetString(string value)
@@ -37,9 +37,9 @@ namespace MapleLib.WzLib.WzStructure
             return new WzStringProperty("", value);
         }
 
-        public static string GetOptionalString(IWzImageProperty source)
+        public static string GetOptionalString(WzImageProperty source)
         {
-            return source == null ? null : ((WzStringProperty)source).Value;
+            return source == null ? null : source.GetString();
         }
 
         public static WzStringProperty SetOptionalString(string value)
@@ -47,9 +47,9 @@ namespace MapleLib.WzLib.WzStructure
             return value == null ? null : SetString(value);
         }
 
-        public static double GetDouble(IWzImageProperty source)
+        public static double GetDouble(WzImageProperty source)
         {
-            return ((WzDoubleProperty)source).Value;
+            return source.GetDouble();
         }
 
         public static WzDoubleProperty SetDouble(double value)
@@ -57,68 +57,68 @@ namespace MapleLib.WzLib.WzStructure
             return new WzDoubleProperty("", value);
         }
 
-        public static int GetInt(IWzImageProperty source)
+        public static int GetInt(WzImageProperty source)
         {
-            return ((WzCompressedIntProperty)source).Value;
+            return source.GetInt();
         }
 
-        public static WzCompressedIntProperty SetInt(int value)
+        public static WzIntProperty SetInt(int value)
         {
-            return new WzCompressedIntProperty("", value);
+            return new WzIntProperty("", value);
         }
 
-        public static int? GetOptionalInt(IWzImageProperty source)
+        public static int? GetOptionalInt(WzImageProperty source)
         {
-            return source == null ? (int?)null : ((WzCompressedIntProperty)source).Value;
+            return source == null ? (int?)null : source.GetInt();
         }
 
-        public static WzCompressedIntProperty SetOptionalInt(int? value)
+        public static WzIntProperty SetOptionalInt(int? value)
         {
             return value.HasValue ? SetInt(value.Value) : null;
         }
 
-        public static bool GetBool(IWzImageProperty source)
+        public static bool GetBool(WzImageProperty source)
         {
-            return ((WzCompressedIntProperty)source).Value == 1;
+            return source.GetInt() == 1;
         }
 
-        public static WzCompressedIntProperty SetBool(bool value)
+        public static WzIntProperty SetBool(bool value)
         {
-            return new WzCompressedIntProperty("", value ? 1 : 0);
+            return new WzIntProperty("", value ? 1 : 0);
         }
 
-        public static MapleBool GetOptionalBool(IWzImageProperty source)
+        public static MapleBool GetOptionalBool(WzImageProperty source)
         {
             if (source == null) return MapleBool.NotExist;
-            else return ((WzCompressedIntProperty)source).Value == 1;
+            else return source.GetInt() == 1;
         }
 
-        public static WzCompressedIntProperty SetOptionalBool(MapleBool value)
+        public static WzIntProperty SetOptionalBool(MapleBool value)
         {
             return value.HasValue ? SetBool(value.Value) : null;
         }
 
-        public static float GetFloat(IWzImageProperty source)
+        public static float GetFloat(WzImageProperty source)
         {
-            return ((WzByteFloatProperty)source).Value;
+            return source.GetFloat();
         }
 
-        public static WzByteFloatProperty SetFloat(float value)
+        public static WzFloatProperty SetFloat(float value)
         {
-            return new WzByteFloatProperty("", value);
+            return new WzFloatProperty("", value);
         }
 
-        public static float? GetOptionalFloat(IWzImageProperty source)
+        public static float? GetOptionalFloat(WzImageProperty source)
         {
-            return source == null ? (float?)null : ((WzByteFloatProperty)source).Value;
+            return source == null ? (float?)null : source.GetFloat();
         }
 
-        public static WzByteFloatProperty SetOptionalFloat(float? value)
+        public static WzFloatProperty SetOptionalFloat(float? value)
         {
             return value.HasValue ? SetFloat(value.Value) : null;
         }
 
-        public static int? GetOptionalTranslatedInt(IWzImageProperty source)
+        public static int? GetOptionalTranslatedInt(WzImageProperty source)
         {
             string str = InfoTool.GetOptionalString(source);
             if (str == null) return null;

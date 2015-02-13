@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\ErrorLogger.cs" />
-    <Compile Include="WzLib\IExtended.cs" />
+    <Compile Include="WzLib\WzExtended.cs" />
     <Compile Include="MapleCryptoLib\AESEncryption.cs" />
     <Compile Include="MapleCryptoLib\CryptoConstants.cs" />
     <Compile Include="MapleCryptoLib\MapleCrypto.cs" />
@@ -102,8 +102,8 @@
     <Compile Include="PacketLib\SessionType.cs" />
     <Compile Include="PacketLib\SocketInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WzLib\IWzImageProperty.cs" />
-    <Compile Include="WzLib\IWzObject.cs" />
+    <Compile Include="WzLib\WzImageProperty.cs" />
+    <Compile Include="WzLib\WzObject.cs" />
     <Compile Include="WzLib\Util\WzBinaryReader.cs" />
     <Compile Include="WzLib\Util\WzBinaryWriter.cs" />
     <Compile Include="WzLib\Util\WzKeyGenerator.cs" />
@@ -116,9 +116,9 @@
     <Compile Include="WzLib\WzListFile.cs" />
     <Compile Include="WzLib\WzMapleVersion.cs" />
     <Compile Include="WzLib\WzObjectType.cs" />
-    <Compile Include="WzLib\WzProperties\WzByteFloatProperty.cs" />
+    <Compile Include="WzLib\WzProperties\WzFloatProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzCanvasProperty.cs" />
-    <Compile Include="WzLib\WzProperties\WzCompressedIntProperty.cs" />
+    <Compile Include="WzLib\WzProperties\WzIntProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzConvexProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzDoubleProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzNullProperty.cs" />
@@ -126,7 +126,7 @@
     <Compile Include="WzLib\WzProperties\WzSoundProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzStringProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzSubProperty.cs" />
-    <Compile Include="WzLib\WzProperties\WzUnsignedShortProperty.cs" />
+    <Compile Include="WzLib\WzProperties\WzShortProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzUOLProperty.cs" />
     <Compile Include="WzLib\WzProperties\WzVectorProperty.cs" />
     <Compile Include="WzLib\IPropertyContainer.cs" />

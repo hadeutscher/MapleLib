@@ -23,7 +23,7 @@ namespace MapleLib.WzLib
 	/// <summary>
 	/// A directory in the wz file, which may contain sub directories or wz images
 	/// </summary>
-	public class WzDirectory : IWzObject
+	public class WzDirectory : WzObject
 	{
 		#region Fields
 		internal List<WzImage> images = new List<WzImage>();
@@ -34,7 +34,7 @@ namespace MapleLib.WzLib
 		internal uint hash;
 		internal int size, checksum, offsetSize;
 		internal byte[] WzIv;
-		internal IWzObject parent;
+		internal WzObject parent;
         internal WzFile wzFile;
 		#endregion
 
@@ -42,7 +42,7 @@ namespace MapleLib.WzLib
 		/// <summary>  
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/// <summary>
 		/// The name of the directory
 		/// </summary>
@@ -101,7 +101,7 @@ namespace MapleLib.WzLib
 		/// </summary>
 		/// <param name="name">The name of the img or dir to find</param>
 		/// <returns>A WzImage or WzDirectory</returns>
-		public IWzObject this[string name]
+		public WzObject this[string name]
 		{
 			get
 			{

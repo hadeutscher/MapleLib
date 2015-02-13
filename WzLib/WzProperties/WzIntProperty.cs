@@ -23,12 +23,12 @@ namespace MapleLib.WzLib.WzProperties
 	/// A property that is stored in the wz file with a signed byte and possibly followed by an int. If the 
 	/// signed byte is equal to -128, the value is is the int that follows, else the value is the byte.
 	/// </summary>
-	public class WzCompressedIntProperty : IWzImageProperty
+	public class WzIntProperty : WzImageProperty
 	{
 		#region Fields
 		internal string name;
 		internal int val;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -38,9 +38,9 @@ namespace MapleLib.WzLib.WzProperties
             val = System.Convert.ToInt32(value);
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
-            WzCompressedIntProperty clone = (WzCompressedIntProperty)MemberwiseClone();
+            WzIntProperty clone = (WzIntProperty)MemberwiseClone();
             return clone;
         }
 
@@ -48,7 +48,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>
@@ -56,7 +56,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The WzPropertyType of the property
 		/// </summary>
-		public override WzPropertyType PropertyType { get { return WzPropertyType.CompressedInt; } }
+		public override WzPropertyType PropertyType { get { return WzPropertyType.Int; } }
 		/// <summary>
 		/// The name of the property
 		/// </summary>
@@ -87,12 +87,12 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// Creates a blank WzCompressedIntProperty
 		/// </summary>
-		public WzCompressedIntProperty() { }
+		public WzIntProperty() { }
 		/// <summary>
 		/// Creates a WzCompressedIntProperty with the specified name
 		/// </summary>
 		/// <param name="name">The name of the property</param>
-		public WzCompressedIntProperty(string name)
+		public WzIntProperty(string name)
 		{
 			this.name = name;
 		}
@@ -101,7 +101,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// </summary>
 		/// <param name="name">The name of the property</param>
 		/// <param name="value">The value of the property</param>
-		public WzCompressedIntProperty(string name, int value)
+		public WzIntProperty(string name, int value)
 		{
 			this.name = name;
 			this.val = value;
@@ -109,24 +109,29 @@ namespace MapleLib.WzLib.WzProperties
 		#endregion
 
         #region Cast Values
-        internal override float ToFloat(float def)
+        public override float GetFloat()
         {
             return (float)val;
         }
 
-        internal override double ToDouble(double def)
+        public override double GetDouble()
         {
             return (double)val;
         }
 
-        internal override int ToInt(int def)
+        public override int GetInt()
         {
             return val;
         }
 
-        internal override ushort ToUnsignedShort(ushort def)
+        public override short GetShort()
         {
-            return (ushort)val;
+            return (short)val;
+        }
+
+        public override string ToString()
+        {
+            return val.ToString();
         }
         #endregion
 	}

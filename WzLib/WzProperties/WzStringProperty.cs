@@ -22,11 +22,11 @@ namespace MapleLib.WzLib.WzProperties
 	/// <summary>
 	/// A property with a string as a value
 	/// </summary>
-	public class WzStringProperty : IWzImageProperty
+	public class WzStringProperty : WzImageProperty
 	{
 		#region Fields
 		internal string name, val;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -36,7 +36,7 @@ namespace MapleLib.WzLib.WzProperties
             val = (string)value;
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzStringProperty clone = (WzStringProperty)MemberwiseClone();
             return clone;
@@ -46,7 +46,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>
@@ -108,24 +108,9 @@ namespace MapleLib.WzLib.WzProperties
 		#endregion
 
         #region Cast Values
-        internal override float ToFloat(float def)
+        public override string GetString()
         {
-            return float.Parse(val);
-        }
-
-        internal override double ToDouble(double def)
-        {
-            return double.Parse(val);
-        }
-
-        internal override int ToInt(int def)
-        {
-            return int.Parse(val);
-        }
-
-        internal override ushort ToUnsignedShort(ushort def)
-        {
-            return ushort.Parse(val);
+            return val;
         }
 
         public override string ToString()

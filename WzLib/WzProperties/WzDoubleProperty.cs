@@ -22,12 +22,12 @@ namespace MapleLib.WzLib.WzProperties
 	/// <summary>
 	/// A property that has the value of a double
 	/// </summary>
-	public class WzDoubleProperty : IWzImageProperty
+	public class WzDoubleProperty : WzImageProperty
 	{
 		#region Fields
 		internal string name;
 		internal double val;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -37,7 +37,7 @@ namespace MapleLib.WzLib.WzProperties
             val = (double)value;
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzDoubleProperty clone = (WzDoubleProperty)MemberwiseClone();
             return clone;
@@ -47,7 +47,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>
@@ -105,24 +105,29 @@ namespace MapleLib.WzLib.WzProperties
 		#endregion
 
         #region Cast Values
-        internal override float ToFloat(float def)
+        public override float GetFloat()
         {
             return (float)val;
         }
 
-        internal override double ToDouble(double def)
+        public override double GetDouble()
         {
             return val;
         }
 
-        internal override int ToInt(int def)
+        public override int GetInt()
         {
             return (int)val;
         }
 
-        internal override ushort ToUnsignedShort(ushort def)
+        public override short GetShort()
         {
-            return (ushort)val;
+            return (short)val;
+        }
+
+        public override string ToString()
+        {
+            return val.ToString();
         }
         #endregion
 	}

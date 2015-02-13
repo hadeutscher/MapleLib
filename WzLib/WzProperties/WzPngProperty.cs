@@ -27,13 +27,13 @@ namespace MapleLib.WzLib.WzProperties
     /// <summary>
     /// A property that contains the information for a bitmap
     /// </summary>
-    public class WzPngProperty : IWzImageProperty
+    public class WzPngProperty : WzImageProperty
     {
         #region Fields
         internal int width, height, format, format2;
         internal byte[] compressedBytes;
         internal Bitmap png;
-        internal IWzObject parent;
+        internal WzObject parent;
         //internal WzImage imgParent;
         internal bool listWzUsed = false;
 
@@ -48,7 +48,7 @@ namespace MapleLib.WzLib.WzProperties
             else compressedBytes = (byte[])value;
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzPngProperty clone = (WzPngProperty)MemberwiseClone();
             clone.compressedBytes = GetCompressedBytes(false);
@@ -59,7 +59,7 @@ namespace MapleLib.WzLib.WzProperties
         /// <summary>
         /// The parent of the object
         /// </summary>
-        public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+        public override WzObject Parent { get { return parent; } internal set { parent = value; } }
         /*/// <summary>
         /// The image that this property is contained in
         /// </summary>
@@ -371,19 +371,10 @@ namespace MapleLib.WzLib.WzProperties
         #endregion
 
         #region Cast Values
-        internal override WzPngProperty ToPngProperty(WzPngProperty def)
-        {
-            return this;
-        }
 
-        internal override Bitmap ToBitmap(Bitmap def)
+        public override Bitmap GetBitmap()
         {
             return GetPNG(false);
-        }
-
-        internal override byte[] ToBytes(byte[] def)
-        {
-            return base.ToBytes(def);
         }
         #endregion
     }

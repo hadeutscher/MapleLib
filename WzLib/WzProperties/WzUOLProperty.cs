@@ -20,19 +20,20 @@
 using System.IO;
 using System.Collections.Generic;
 using MapleLib.WzLib.Util;
+using System.Drawing;
 
 namespace MapleLib.WzLib.WzProperties
 {
 	/// <summary>
 	/// A property that's value is a string
 	/// </summary>
-	public class WzUOLProperty : IExtended
+    public class WzUOLProperty : WzExtended
 	{
 		#region Fields
 		internal string name, val;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
-		internal IWzObject linkVal;
+		internal WzObject linkVal;
 		#endregion
 
 		#region Inherited Members
@@ -41,7 +42,7 @@ namespace MapleLib.WzLib.WzProperties
             val = (string)value;
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzUOLProperty clone = (WzUOLProperty)MemberwiseClone();
             clone.linkVal = null;
@@ -62,7 +63,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 
 		/*/// <summary>
 		/// The image that this property is contained in
@@ -75,27 +76,27 @@ namespace MapleLib.WzLib.WzProperties
 		public override string Name { get { return name; } set { name = value; } }
 
 #if UOLRES
-		public override List<IWzImageProperty> WzProperties
+		public override List<WzImageProperty> WzProperties
 		{
 			get
 			{
-               return LinkValue is IWzImageProperty ? ((IWzImageProperty)LinkValue).WzProperties : null;
+               return LinkValue is WzImageProperty ? ((WzImageProperty)LinkValue).WzProperties : null;
 			}
 		}
 
 
-        public override IWzImageProperty this[string name]
+        public override WzImageProperty this[string name]
 		{
 			get
 			{
 
-                return LinkValue is IWzImageProperty ? ((IWzImageProperty)LinkValue)[name] : LinkValue is WzImage ? ((WzImage)LinkValue)[name] : null;
+                return LinkValue is WzImageProperty ? ((WzImageProperty)LinkValue)[name] : LinkValue is WzImage ? ((WzImage)LinkValue)[name] : null;
 			}
 		}
 
-		public override IWzImageProperty GetFromPath(string path)
+		public override WzImageProperty GetFromPath(string path)
 		{
-            return LinkValue is IWzImageProperty ? ((IWzImageProperty)LinkValue).GetFromPath(path) : LinkValue is WzImage ? ((WzImage)LinkValue).GetFromPath(path) : null;
+            return LinkValue is WzImageProperty ? ((WzImageProperty)LinkValue).GetFromPath(path) : LinkValue is WzImage ? ((WzImage)LinkValue).GetFromPath(path) : null;
 		}
 #endif
 
@@ -133,25 +134,25 @@ namespace MapleLib.WzLib.WzProperties
 		public string Value { get { return val; } set { val = value; } }
 
 #if UOLRES
-        public IWzObject LinkValue
+        public WzObject LinkValue
 		{
 			get
 			{
 				if (linkVal == null)
 				{
 					string[] paths = val.Split('/');
-                    linkVal = (IWzObject)this.parent;
+                    linkVal = (WzObject)this.parent;
                     string asdf = parent.FullPath;
 					foreach (string path in paths)
 					{
 						if (path == "..")
 						{
-                            linkVal = (IWzObject)linkVal.Parent;
+                            linkVal = (WzObject)linkVal.Parent;
 						}
 						else
 						{
-                            if (linkVal is IWzImageProperty)
-                                linkVal = ((IWzImageProperty)linkVal)[path];
+                            if (linkVal is WzImageProperty)
+                                linkVal = ((WzImageProperty)linkVal)[path];
                             else if (linkVal is WzImage)
                                 linkVal = ((WzImage)linkVal)[path];
                             else if (linkVal is WzDirectory)
@@ -197,58 +198,55 @@ namespace MapleLib.WzLib.WzProperties
 
         #region Cast Values
 #if UOLRES
-        internal override System.Drawing.Bitmap ToBitmap(System.Drawing.Bitmap def)
+        public override int GetInt()
         {
-            return LinkValue.ToBitmap(def);
+            return LinkValue.GetInt();
         }
 
-        internal override byte[] ToBytes(byte[] def)
+        public override short GetShort()
         {
-            return LinkValue.ToBytes(def);
+            return LinkValue.GetShort();
         }
 
-        internal override double ToDouble(double def)
+        public override float GetFloat()
         {
-            return LinkValue.ToDouble(def);
+            return LinkValue.GetFloat();
         }
 
-        internal override float ToFloat(float def)
+        public override double GetDouble()
         {
-            return LinkValue.ToFloat(def);
+            return LinkValue.GetDouble();
         }
 
-        internal override int ToInt(int def)
+        public override string GetString()
         {
-            return LinkValue.ToInt(def);
+            return LinkValue.GetString();
         }
 
-        internal override WzPngProperty ToPngProperty(WzPngProperty def)
+        public override Point GetPoint()
         {
-            return LinkValue.ToPngProperty(def);
+            return LinkValue.GetPoint();
         }
 
-        internal override System.Drawing.Point ToPoint(System.Drawing.Point def)
+        public override Bitmap GetBitmap()
         {
-            return LinkValue.ToPoint(def);
+            return LinkValue.GetBitmap();
         }
 
-        public override string ToString()
+        public override byte[] GetBytes()
         {
-            return val;
-            //return LinkValue.ToString();
+            return LinkValue.GetBytes();
         }
-
-        internal override ushort ToUnsignedShort(ushort def)
-        {
-            return LinkValue.ToUnsignedShort(def);
-        }
-
 #else
-        public override string ToString()
+        public override string GetString()
         {
             return val;
         }
 #endif
+        public override string ToString()
+        {
+            return val;
+        }
         #endregion
     }
 }

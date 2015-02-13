@@ -21,9 +21,9 @@ using MapleLib.WzLib.WzProperties;
 namespace MapleLib.WzLib
 {
 	/// <summary>
-	/// An interface for wz objects
+	/// An abstract class for wz objects
 	/// </summary>
-	public abstract class IWzObject : IDisposable
+	public abstract class WzObject : IDisposable
 	{
         private object tag = null;
         private object tag2 = null;
@@ -42,11 +42,11 @@ namespace MapleLib.WzLib
 		/// <summary>
 		/// Returns the parent object
 		/// </summary>
-		public abstract IWzObject Parent { get; internal set; }
+		public abstract WzObject Parent { get; internal set; }
         /// <summary>
         /// Returns the parent WZ File
         /// </summary>
-        public abstract /*I*/WzFile WzFileParent { get; }
+        public abstract WzFile WzFileParent { get; }
 
         public string FullPath
         {
@@ -54,7 +54,7 @@ namespace MapleLib.WzLib
             {
                 if (this is WzFile) return ((WzFile)this).WzDirectory.Name;
                 string result = this.Name;
-                IWzObject currObj = this;
+                WzObject currObj = this;
                 while (currObj.Parent != null)
                 {
                     currObj = currObj.Parent;
@@ -96,103 +96,47 @@ namespace MapleLib.WzLib
         public abstract void Remove();
 
         //Credits to BluePoop for the idea of using cast overriding
+        //2015 - That is the worst idea ever, removed and replaced with Get* methods
         #region Cast Values
-        public static explicit operator float(IWzObject obj)
+        public virtual int GetInt()
         {
-            return obj.ToFloat(0);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator int(IWzObject obj)
+        public virtual short GetShort()
         {
-            return obj.ToInt(0);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator double(IWzObject obj)
+        public virtual float GetFloat()
         {
-            return obj.ToDouble(0);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator System.Drawing.Bitmap(IWzObject obj)
+        public virtual double GetDouble()
         {
-            return obj.ToBitmap(null);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator byte[](IWzObject obj)
+        public virtual string GetString()
         {
-            return obj.ToBytes(null);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator string(IWzObject obj)
+        public virtual Point GetPoint()
         {
-            return obj.ToString();
+            throw new NotImplementedException();
         }
 
-        public static explicit operator ushort(IWzObject obj)
+        public virtual Bitmap GetBitmap()
         {
-            return obj.ToUnsignedShort(0);
+            throw new NotImplementedException();
         }
 
-        public static explicit operator System.Drawing.Point(IWzObject obj)
+        public virtual byte[] GetBytes()
         {
-            return obj.ToPoint(Point.Empty);
+            throw new NotImplementedException();
         }
-
-        internal virtual float ToFloat(float def)
-        {
-            return def;
-        }
-
-        internal virtual WzPngProperty ToPngProperty(WzPngProperty def)
-        {
-            /*if (this is WzPngProperty) return (WzPngProperty)this;
-            else if (this is WzCanvasProperty) return (WzPngProperty)WzValue;
-            else if (this is WzUOLProperty) return ToUOLLink(this).ToPngProperty(def);
-            else */return def;
-        }
-
-        internal virtual int ToInt(int def)
-        {
-            return def;
-        }
-
-        internal virtual double ToDouble(double def)
-        {
-            return def;
-        }
-
-        internal virtual Bitmap ToBitmap(Bitmap def)
-        {
-            /*if (this is WzPngProperty) return (Bitmap)WzValue;
-            else if (this is WzCanvasProperty) return (Bitmap)((WzCanvasProperty)this).PngProperty.WzValue;
-            else if (this is WzUOLProperty) return ToUOLLink(this).ToBitmap(def);
-            else */
-            return def;
-        }
-
-        internal virtual byte[] ToBytes(byte[] def)
-        {
-            /*WzPngProperty png;
-            if (this is WzSoundProperty) return (byte[])WzValue;
-            else if ((png = (WzPngProperty)this) != null) return png.GetCompressedBytes(false);
-            else */
-            return def;
-        }
-
-        public override string ToString()
-        {
-            return WzValue.ToString();
-        }
-
-        internal virtual ushort ToUnsignedShort(ushort def)
-        {
-            return def;
-        }
-
-        internal virtual Point ToPoint(Point def)
-        {
-            return def;
-        }
-
         #endregion
 
 	}

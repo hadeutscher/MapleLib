@@ -20,9 +20,9 @@ namespace MapleLib.WzLib
 	{
 		#region Regular
 		Null,
-		UnsignedShort,
-		CompressedInt,
-		ByteFloat,
+		Short,
+		Int,
+		Float,
 		Double,
 		String,
 		#endregion

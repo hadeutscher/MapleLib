@@ -52,7 +52,7 @@ namespace MapleLib.WzLib
             foreach (FieldInfo fieldInfo in settingsHolderType.GetFields(BindingFlags.Public | BindingFlags.Static))
             {
                 string settingName = fieldInfo.Name;
-                IWzImageProperty settingProp = settingsImage[settingName];
+                WzImageProperty settingProp = settingsImage[settingName];
                 byte[] argb;
                 if (settingProp == null)
                     SaveField(settingsImage, fieldInfo);
@@ -81,7 +81,7 @@ namespace MapleLib.WzLib
                             //bool a = (bool)fieldInfo.GetValue(null);
                             break;
                         case "System.Single":
-                            fieldInfo.SetValue(null, ((WzByteFloatProperty)settingProp).Value);
+                            fieldInfo.SetValue(null, ((WzFloatProperty)settingProp).Value);
                             break;
                         /*case "WzMapleVersion":
                             fieldInfo.SetValue(null, (WzMapleVersion)InfoTool.GetInt(settingProp));
@@ -106,18 +106,18 @@ namespace MapleLib.WzLib
 
         private void CreateWzProp(IPropertyContainer parent, WzPropertyType propType, string propName, object value)
         {
-            IWzImageProperty addedProp;
+            WzImageProperty addedProp;
             switch (propType)
             {
-                case WzPropertyType.ByteFloat:
-                    addedProp = new WzByteFloatProperty(propName);
+                case WzPropertyType.Float:
+                    addedProp = new WzFloatProperty(propName);
                     break;
                 case WzPropertyType.Canvas:
                     addedProp = new WzCanvasProperty(propName);
                     ((WzCanvasProperty)addedProp).PngProperty = new WzPngProperty();
                     break;
-                case WzPropertyType.CompressedInt:
-                    addedProp = new WzCompressedIntProperty(propName);
+                case WzPropertyType.Int:
+                    addedProp = new WzIntProperty(propName);
                     break;
                 case WzPropertyType.Double:
                     addedProp = new WzDoubleProperty(propName);
@@ -128,13 +128,13 @@ namespace MapleLib.WzLib
                 case WzPropertyType.String:
                     addedProp = new WzStringProperty(propName);
                     break;
-                case WzPropertyType.UnsignedShort:
-                    addedProp = new WzUnsignedShortProperty(propName);
+                case WzPropertyType.Short:
+                    addedProp = new WzShortProperty(propName);
                     break;
                 case WzPropertyType.Vector:
                     addedProp = new WzVectorProperty(propName);
-                    ((WzVectorProperty)addedProp).X = new WzCompressedIntProperty("X");
-                    ((WzVectorProperty)addedProp).Y = new WzCompressedIntProperty("Y");
+                    ((WzVectorProperty)addedProp).X = new WzIntProperty("X");
+                    ((WzVectorProperty)addedProp).Y = new WzIntProperty("Y");
                     break;
                 default:
                     throw new NotSupportedException("not supported type");
@@ -145,7 +145,7 @@ namespace MapleLib.WzLib
 
         private void SetWzProperty(WzImage parentImage, string propName, WzPropertyType propType, object value)
         {
-            IWzImageProperty property = parentImage[propName];
+            WzImageProperty property = parentImage[propName];
             if (property != null)
             {
                 if (property.PropertyType == propType)
@@ -174,7 +174,7 @@ namespace MapleLib.WzLib
         {
             string settingName = fieldInfo.Name;
             if (fieldInfo.FieldType.BaseType != null && fieldInfo.FieldType.BaseType.FullName == "System.Enum")
-                SetWzProperty(settingsImage, settingName, WzPropertyType.CompressedInt, fieldInfo.GetValue(null));
+                SetWzProperty(settingsImage, settingName, WzPropertyType.Int, fieldInfo.GetValue(null));
             else switch (fieldInfo.FieldType.FullName)
                 {
                     //case "Microsoft.Xna.Framework.Graphics.Color":
@@ -188,13 +188,13 @@ namespace MapleLib.WzLib
                         SetWzProperty(settingsImage, settingName, WzPropertyType.Double, (double)((System.Drawing.Color)fieldInfo.GetValue(null)).ToArgb());
                         break;
                     case "System.Int32":
-                        SetWzProperty(settingsImage, settingName, WzPropertyType.CompressedInt, fieldInfo.GetValue(null));
+                        SetWzProperty(settingsImage, settingName, WzPropertyType.Int, fieldInfo.GetValue(null));
                         break;
                     case "System.Double":
                         SetWzProperty(settingsImage, settingName, WzPropertyType.Double, fieldInfo.GetValue(null));
                         break;
                     case "Single":
-                        SetWzProperty(settingsImage, settingName, WzPropertyType.ByteFloat, fieldInfo.GetValue(null));
+                        SetWzProperty(settingsImage, settingName, WzPropertyType.Float, fieldInfo.GetValue(null));
                         break;
                     case "System.Drawing.Size":
                         SetWzProperty(settingsImage, settingName, WzPropertyType.Vector, fieldInfo.GetValue(null));
@@ -206,7 +206,7 @@ namespace MapleLib.WzLib
                         SetWzProperty(settingsImage, settingName, WzPropertyType.Canvas, fieldInfo.GetValue(null));
                         break;
                     case "System.Boolean":
-                        SetWzProperty(settingsImage, settingName, WzPropertyType.CompressedInt, (bool)fieldInfo.GetValue(null) ? 1 : 0);
+                        SetWzProperty(settingsImage, settingName, WzPropertyType.Int, (bool)fieldInfo.GetValue(null) ? 1 : 0);
                         break;
                 }
         }

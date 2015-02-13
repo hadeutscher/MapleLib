@@ -18,19 +18,20 @@ using System.Collections.Generic;
 using System.IO;
 using MapleLib.WzLib.Util;
 using System;
+using System.Drawing;
 
 namespace MapleLib.WzLib.WzProperties
 {
 	/// <summary>
 	/// A property that can contain sub properties and has one png image
 	/// </summary>
-    public class WzCanvasProperty : IExtended, IPropertyContainer
+    public class WzCanvasProperty : WzExtended, IPropertyContainer
 	{
 		#region Fields
-		internal List<IWzImageProperty> properties = new List<IWzImageProperty>();
+		internal List<WzImageProperty> properties = new List<WzImageProperty>();
 		internal WzPngProperty imageProp;
 		internal string name;
-		internal IWzObject parent;
+		internal WzObject parent;
 		//internal WzImage imgParent;
 		#endregion
 
@@ -40,11 +41,11 @@ namespace MapleLib.WzLib.WzProperties
             imageProp.SetValue(value);
         }
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzCanvasProperty clone = (WzCanvasProperty)MemberwiseClone();
-            clone.properties = new List<IWzImageProperty>();
-            foreach (IWzImageProperty prop in properties)
+            clone.properties = new List<WzImageProperty>();
+            foreach (WzImageProperty prop in properties)
                 clone.properties.Add(prop.DeepClone());
             clone.imageProp = (WzPngProperty)imageProp.DeepClone();
             return clone;
@@ -54,7 +55,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/// <summary>
 		/// The WzPropertyType of the property
 		/// </summary>
@@ -62,7 +63,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The properties contained in this property
 		/// </summary>
-		public override List<IWzImageProperty> WzProperties
+		public override List<WzImageProperty> WzProperties
 		{
 			get
 			{
@@ -78,22 +79,22 @@ namespace MapleLib.WzLib.WzProperties
 		/// </summary>
 		/// <param name="name">The name of the property</param>
 		/// <returns>The wz property with the specified name</returns>
-		public override IWzImageProperty this[string name]
+		public override WzImageProperty this[string name]
 		{
 			get
 			{
 				if (name == "PNG")
 					return imageProp;
-				foreach (IWzImageProperty iwp in properties)
+				foreach (WzImageProperty iwp in properties)
 					if (iwp.Name.ToLower() == name.ToLower())
                         return iwp;
 				return null;
 			}
 		}
 
-        public IWzImageProperty GetProperty(string name)
+        public WzImageProperty GetProperty(string name)
         {
-            foreach (IWzImageProperty iwp in properties)
+            foreach (WzImageProperty iwp in properties)
                 if (iwp.Name.ToLower() == name.ToLower())
                     return iwp;
             return null;
@@ -103,14 +104,14 @@ namespace MapleLib.WzLib.WzProperties
 		/// </summary>
 		/// <param name="path">path to property</param>
 		/// <returns>the wz property with the specified name</returns>
-		public override IWzImageProperty GetFromPath(string path)
+		public override WzImageProperty GetFromPath(string path)
 		{
 			string[] segments = path.Split(new char[1] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
 			if (segments[0] == "..")
 			{
-				return ((IWzImageProperty)Parent)[path.Substring(name.IndexOf('/') + 1)];
+				return ((WzImageProperty)Parent)[path.Substring(name.IndexOf('/') + 1)];
 			}
-			IWzImageProperty ret = this;
+			WzImageProperty ret = this;
 			for (int x = 0; x < segments.Length; x++)
 			{
 				bool foundChild = false;
@@ -118,7 +119,7 @@ namespace MapleLib.WzLib.WzProperties
 				{
 					return imageProp;
 				}
-				foreach (IWzImageProperty iwp in ret.WzProperties)
+				foreach (WzImageProperty iwp in ret.WzProperties)
 				{
 					if (iwp.Name == segments[x])
 					{
@@ -141,7 +142,7 @@ namespace MapleLib.WzLib.WzProperties
 			if (properties.Count > 0)
 			{
 				writer.Write((byte)1);
-				IWzImageProperty.WritePropertyList(writer, properties);
+				WzImageProperty.WritePropertyList(writer, properties);
 			}
 			else
 			{
@@ -162,7 +163,7 @@ namespace MapleLib.WzLib.WzProperties
 			writer.WriteLine(XmlUtil.Indentation(level) + XmlUtil.OpenNamedTag("WzCanvas", this.Name, false, false) +
 			XmlUtil.Attrib("width", PngProperty.Width.ToString()) +
 			XmlUtil.Attrib("height", PngProperty.Height.ToString(), true, false));
-			IWzImageProperty.DumpPropertyList(writer, level, this.WzProperties);
+			WzImageProperty.DumpPropertyList(writer, level, this.WzProperties);
 			writer.WriteLine(XmlUtil.Indentation(level) + XmlUtil.CloseTag("WzCanvas"));
 		}
 		/// <summary>
@@ -173,7 +174,7 @@ namespace MapleLib.WzLib.WzProperties
 			name = null;
 			imageProp.Dispose();
 			imageProp = null;
-			foreach (IWzImageProperty prop in properties)
+			foreach (WzImageProperty prop in properties)
 			{
 				prop.Dispose();
 			}
@@ -203,14 +204,14 @@ namespace MapleLib.WzLib.WzProperties
 		/// Adds a property to the property list of this property
 		/// </summary>
 		/// <param name="prop">The property to add</param>
-		public void AddProperty(IWzImageProperty prop)
+		public void AddProperty(WzImageProperty prop)
 		{
             prop.Parent = this;
             properties.Add(prop);
 		}
-		public void AddProperties(List<IWzImageProperty> props)
+		public void AddProperties(List<WzImageProperty> props)
 		{
-			foreach (IWzImageProperty prop in props)
+			foreach (WzImageProperty prop in props)
 			{
 				AddProperty(prop);
 			}
@@ -219,7 +220,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// Remove a property
 		/// </summary>
 		/// <param name="name">Name of Property</param>
-        public void RemoveProperty(IWzImageProperty prop)
+        public void RemoveProperty(WzImageProperty prop)
 		{
             prop.Parent = null;
 			properties.Remove(prop);
@@ -230,18 +231,14 @@ namespace MapleLib.WzLib.WzProperties
 		/// </summary>
 		public void ClearProperties()
         {
-            foreach (IWzImageProperty prop in properties) prop.Parent = null;
+            foreach (WzImageProperty prop in properties) prop.Parent = null;
 			properties.Clear();
 		}
 		#endregion
 
         #region Cast Values
-        internal override WzPngProperty ToPngProperty(WzPngProperty def)
-        {
-            return imageProp;
-        }
 
-        internal override System.Drawing.Bitmap ToBitmap(System.Drawing.Bitmap def)
+        public override Bitmap GetBitmap()
         {
             return imageProp.GetPNG(false);
         }

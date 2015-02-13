@@ -23,11 +23,11 @@ namespace MapleLib.WzLib
 {
 	public interface IPropertyContainer
 	{
-		void AddProperty(IWzImageProperty prop);
-		void AddProperties(List<IWzImageProperty> props);
-		void RemoveProperty(IWzImageProperty prop);
+		void AddProperty(WzImageProperty prop);
+		void AddProperties(List<WzImageProperty> props);
+		void RemoveProperty(WzImageProperty prop);
 		void ClearProperties();
-        List<IWzImageProperty> WzProperties { get; }
-        IWzImageProperty this[string name] { get; }
+        List<WzImageProperty> WzProperties { get; }
+        WzImageProperty this[string name] { get; }
 	}
 }

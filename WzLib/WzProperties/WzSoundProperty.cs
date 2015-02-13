@@ -24,12 +24,12 @@ namespace MapleLib.WzLib.WzProperties
 	/// <summary>
 	/// A property that contains data for an MP3 file
 	/// </summary>
-	public class WzSoundProperty : IExtended
+    public class WzSoundProperty : WzExtended
 	{
 		#region Fields
 		internal string name;
 		internal byte[] mp3bytes = null;
-		internal IWzObject parent;
+		internal WzObject parent;
         internal int len_ms;
         internal int frequency;
         //internal byte bps;
@@ -42,7 +42,7 @@ namespace MapleLib.WzLib.WzProperties
 
 		#region Inherited Members
 
-        public override IWzImageProperty DeepClone()
+        public override WzImageProperty DeepClone()
         {
             WzSoundProperty clone = (WzSoundProperty)MemberwiseClone();
             return clone;
@@ -57,7 +57,7 @@ namespace MapleLib.WzLib.WzProperties
 		/// <summary>
 		/// The parent of the object
 		/// </summary>
-		public override IWzObject Parent { get { return parent; } internal set { parent = value; } }
+		public override WzObject Parent { get { return parent; } internal set { parent = value; } }
 		/*/// <summary>
 		/// The image that this property is contained in
 		/// </summary>
@@ -230,7 +230,7 @@ namespace MapleLib.WzLib.WzProperties
 		#endregion
 
         #region Cast Values
-        internal override byte[] ToBytes(byte[] def)
+        public override byte[] GetBytes()
         {
             return GetBytes(false);
         }

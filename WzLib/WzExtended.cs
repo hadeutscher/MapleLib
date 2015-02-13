@@ -16,7 +16,7 @@
 
 namespace MapleLib.WzLib
 {
-    public abstract class IExtended : IWzImageProperty
+    public abstract class WzExtended : WzImageProperty
     {
     }
 }
