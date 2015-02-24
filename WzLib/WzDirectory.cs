@@ -101,7 +101,7 @@ namespace MapleLib.WzLib
 		/// </summary>
 		/// <param name="name">The name of the img or dir to find</param>
 		/// <returns>A WzImage or WzDirectory</returns>
-		public WzObject this[string name]
+		public new WzObject this[string name]
 		{
 			get
 			{

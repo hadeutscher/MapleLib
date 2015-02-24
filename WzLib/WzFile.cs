@@ -70,7 +70,7 @@ namespace MapleLib.WzLib
 		/// </summary>
 		/// <param name="name">Name</param>
 		/// <returns>WzDirectory[name]</returns>
-		public WzObject this[string name]
+		public new WzObject this[string name]
 		{
 			get { return WzDirectory[name]; }
 		}

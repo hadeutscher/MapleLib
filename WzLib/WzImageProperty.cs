@@ -31,7 +31,7 @@ namespace MapleLib.WzLib
         #region Virtual\Abstrcat Members
         public virtual List<WzImageProperty> WzProperties { get { return null; } }
 
-        public virtual WzImageProperty this[string name] { get { return null; } set { throw new NotImplementedException(); } }
+        public virtual new WzImageProperty this[string name] { get { return null; } set { throw new NotImplementedException(); } }
 
         public virtual WzImageProperty GetFromPath(string path)
         {

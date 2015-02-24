@@ -148,7 +148,7 @@ namespace MapleLib.WzLib
 		/// </summary>
 		/// <param name="name">The name of the property</param>
 		/// <returns>The wz property with the specified name</returns>
-		public WzImageProperty this[string name]
+		public new WzImageProperty this[string name]
 		{
 			get
 			{

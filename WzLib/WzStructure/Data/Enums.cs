@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 using System;
+using System.Collections.Generic;
 
 namespace MapleLib.WzLib.WzStructure.Data
 {
@@ -115,23 +116,23 @@ namespace MapleLib.WzLib.WzStructure.Data
         FIELDTYPE_CRIMSONWOODPQ = 1014
     }
 
-    public enum PortalType //Credits to me and BluePoop
+    public static class PortalType //Credits to me and BluePoop
     {
-        PORTALTYPE_STARTPOINT = 0x0, //sp
-        PORTALTYPE_INVISIBLE = 0x1, //pi
-        PORTALTYPE_VISIBLE = 0x2, //pv
-        PORTALTYPE_COLLISION = 0x3, //pc
-        PORTALTYPE_CHANGABLE = 0x4, //pg
-        PORTALTYPE_CHANGABLE_INVISIBLE = 0x5, //pgi
-        PORTALTYPE_TOWNPORTAL_POINT = 0x6, //tp
-        PORTALTYPE_SCRIPT = 0x7, //ps
-        PORTALTYPE_SCRIPT_INVISIBLE = 0x8, //psi
-        PORTALTYPE_COLLISION_SCRIPT = 0x9, //pcs
-        PORTALTYPE_HIDDEN = 0xA, //ph
-        PORTALTYPE_SCRIPT_HIDDEN = 0xB, //psh
-        PORTALTYPE_COLLISION_VERTICAL_JUMP = 0xC, //pcj
-        PORTALTYPE_COLLISION_CUSTOM_IMPACT = 0xD, //pci
-        PORTALTYPE_COLLISION_UNKNOWN_PCIG = 0xE //pcig
+        public const string PORTALTYPE_STARTPOINT = "sp",
+            PORTALTYPE_INVISIBLE = "pi",
+            PORTALTYPE_VISIBLE = "pv",
+            PORTALTYPE_COLLISION = "pc",
+            PORTALTYPE_CHANGABLE = "pg",
+            PORTALTYPE_CHANGABLE_INVISIBLE = "pgi",
+            PORTALTYPE_TOWNPORTAL_POINT = "tp",
+            PORTALTYPE_SCRIPT = "ps",
+            PORTALTYPE_SCRIPT_INVISIBLE = "psi",
+            PORTALTYPE_COLLISION_SCRIPT = "pcs",
+            PORTALTYPE_HIDDEN = "ph",
+            PORTALTYPE_SCRIPT_HIDDEN = "psh",
+            PORTALTYPE_COLLISION_VERTICAL_JUMP = "pcj",
+            PORTALTYPE_COLLISION_CUSTOM_IMPACT = "pci",
+            PORTALTYPE_COLLISION_UNKNOWN_PCIG = "pcig";
     }
 
     public enum MapType

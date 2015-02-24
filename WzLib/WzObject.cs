@@ -48,6 +48,33 @@ namespace MapleLib.WzLib
         /// </summary>
         public abstract WzFile WzFileParent { get; }
 
+        public WzObject this[string name]
+        {
+            get
+            {
+                if (this is WzFile)
+                {
+                    return ((WzFile)this)[name];
+                } 
+                else if (this is WzDirectory)
+                {
+                    return ((WzDirectory)this)[name];
+                }
+                else if (this is WzImage)
+                {
+                    return ((WzImage)this)[name];
+                }
+                else if (this is WzImageProperty)
+                {
+                    return ((WzImageProperty)this)[name];
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
         public string FullPath
         {
             get

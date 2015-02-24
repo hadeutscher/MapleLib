@@ -15,28 +15,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 using System;
+using System.Collections.Generic;
 
 namespace MapleLib.WzLib.WzStructure.Data
 {
 
     public static class Tables
     {
-        public static string[] PortalTypeNames = new string[] { 
-            "Start Point",
-            "Invisible",
-            "Visible",
-            "Collision",
-            "Changable",
-            "Changable Invisible",
-            "Town Portal", 
-            "Script",
-            "Script Invisible",
-            "Script Collision",
-            "Hidden",
-            "Script Hidden",
-            "Vertical Spring",
-            "Custom Impact Spring",
-            "Unknown (PCIG)" };
+        public static Dictionary<string, string> PortalTypeNames = new Dictionary<string, string>() { 
+            { "sp", "Start Point"},
+            { "pi", "Invisible" },
+            { "pv", "Visible" },
+            { "pc", "Collision" },
+            { "pg", "Changable" },
+            { "pgi", "Changable Invisible" },
+            { "tp", "Town Portal" },
+            { "ps", "Script" },
+            { "psi", "Script Invisible" },
+            { "pcs", "Script Collision" },
+            { "ph", "Hidden" },
+            { "psh", "Script Hidden" },
+            { "pcj", "Vertical Spring" },
+            { "pci", "Custom Impact Spring" },
+            { "pcig", "Unknown (PCIG)" }};
 
         public static string[] BackgroundTypeNames = new string[] {
             "Regular",
