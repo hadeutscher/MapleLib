@@ -50,8 +50,8 @@ namespace MapleLib.WzLib.WzProperties
 
         public override WzImageProperty DeepClone()
         {
-            WzPngProperty clone = (WzPngProperty)MemberwiseClone();
-            clone.compressedBytes = GetCompressedBytes(false);
+            WzPngProperty clone = new WzPngProperty();
+            clone.SetPNG(GetPNG(false));
             return clone;
         }
 

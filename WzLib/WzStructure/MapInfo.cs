@@ -35,12 +35,13 @@ namespace MapleLib.WzLib.WzStructure
         {
         }
 
-        public MapInfo(WzImage image, string strMapName, string strStreetName)
+        public MapInfo(WzImage image, string strMapName, string strStreetName, string strCategoryName)
         {
             int? startHour;
             int? endHour;
             this.strMapName = strMapName;
             this.strStreetName = strStreetName;
+            this.strCategoryName = strCategoryName;
             WzFile file = (WzFile)image.WzFileParent;
             string loggerSuffix = ", map " + image.Name + ((file != null) ? (" of version " + Enum.GetName(typeof(WzMapleVersion), file.MapleVersion) + ", v" + file.Version.ToString()) : "");
             foreach (WzImageProperty prop in image["info"].WzProperties) 
@@ -258,7 +259,7 @@ namespace MapleLib.WzLib.WzStructure
                         break;
                     default:
                         ErrorLogger.Log(ErrorLevel.MissingFeature, "Unknown Prop: " + prop.Name + loggerSuffix);
-                        additionalProps.Add(prop);
+                        additionalProps.Add(prop.DeepClone());
                         break;
                 }
             }
@@ -432,16 +433,15 @@ namespace MapleLib.WzLib.WzStructure
         public MapleBool allMoveCheck = null; //another JQ hack protection
         public MapleBool VRLimit = null; //use vr's as limits?
         public MapleBool consumeItemCoolTime = null; //cool time of consume item
-        public Coconut? coconut = null; // Some stupid ass event, see documentation of the struct
-        public Snowball? snowBall = null; // ditto
-        public MonsterCarnival? monsterCarnival = null;
 
         //Special
         public bool officialVR = false;
         public Rectangle? VR = null;
         public List<WzImageProperty> additionalProps = new List<WzImageProperty>();
+        public List<WzImageProperty> additionalNonInfoProps = new List<WzImageProperty>();
         public string strMapName = "<Untitled>";
         public string strStreetName = "<Untitled>";
+        public string strCategoryName = "HaCreator";
         public int id = 0;
 
         //Editor related, not actual properties
@@ -473,115 +473,6 @@ namespace MapleLib.WzLib.WzStructure
                 this.interval = interval;
                 this.prop = prop;
             }
-        }
-
-        // This is the dumbest of the features I have seen in the whole WZ structure. I do not believe that I'm actually
-        // implementing a struct of this size for an event that probably never happened outside of beta phase.
-        public struct Coconut
-        {
-            public int avatar00cap, avatar01cap, avatar10cap, avatar11cap, avatar00clothes, avatar01clothes, avatar10clothes, avatar11clothes, 
-                countBombing, countFalling, countHit, countStopped, 
-                timeDefault, timeFinished, timeExpand, timeMessage;
-            public string effectLose, effectWin, eventName, eventObjectName, soundLose, soundWin;
-
-            public Coconut(int avatar00cap, int avatar01cap, int avatar10cap, int avatar11cap, int avatar00clothes, int avatar01clothes, int avatar10clothes, int avatar11clothes, 
-                int countBombing, int countFalling, int countHit, int countStopped, int timeDefault, int timeFinished, int timeExpand, int timeMessage,
-                string effectLose, string effectWin, string eventName, string eventObjectName, string soundLose, string soundWin)
-            {
-                this.avatar00cap = avatar00cap;
-                this.avatar01cap = avatar01cap;
-                this.avatar10cap = avatar10cap;
-                this.avatar11cap = avatar11cap;
-                this.avatar00clothes = avatar00clothes;
-                this.avatar01clothes = avatar01clothes;
-                this.avatar10clothes = avatar10clothes;
-                this.avatar11clothes = avatar11clothes;
-                this.countBombing = countBombing;
-                this.countFalling = countFalling;
-                this.countHit = countHit;
-                this.countStopped = countStopped;
-                this.timeDefault = timeDefault;
-                this.timeFinished = timeFinished;
-                this.timeExpand = timeExpand;
-                this.timeMessage = timeMessage;
-                this.effectLose = effectLose;
-                this.effectWin = effectWin;
-                this.eventName = eventName;
-                this.eventObjectName = eventObjectName;
-                this.soundLose = soundLose;
-                this.soundWin = soundWin;
-            }
-        }
-
-        // Another event that never saw the light of day, except for once or twice in beta
-        public struct Snowball
-        {
-            string portal0;
-            string snowBall0;
-            string snowMan0;
-            int y0;
-            string portal1;
-            string snowBall1;
-            string snowMan1;
-            int y1;
-            string damageSnowBall;
-            int damageSnowMan0;
-            int damageSnowMan1;
-            int dx, recoveryAmount, section1, section2, section3, snowManHP, snowManWait, speed, x, x0, xMax, xMin;
-
-            public Snowball(string portal0, string snowBall0, string snowMan0, int y0, string portal1, string snowBall1, string snowMan1, int y1, string damageSnowBall, int damageSnowMan0,
-            int damageSnowMan1, int dx, int recoveryAmount, int section1, int section2, int section3, int snowManHP, int snowManWait, int speed, int x, int x0, int xMax, int xMin)
-            {
-                this.portal0 = portal0;
-                this.snowBall0 = snowBall0;
-                this.snowMan0 = snowMan0;
-                this.y0 = y0;
-                this.portal1 = portal1;
-                this.snowBall1 = snowBall1;
-                this.snowMan1 = snowMan1;
-                this.y1 = y1;
-                this.damageSnowBall = damageSnowBall;
-                this.damageSnowMan0 = damageSnowMan0;
-                this.damageSnowMan1 = damageSnowMan1;
-                this.dx = dx;
-                this.recoveryAmount = recoveryAmount;
-                this.section1 = section1;
-                this.section2 = section2;
-                this.section3 = section3;
-                this.snowManHP = snowManHP;
-                this.snowManWait = snowManWait;
-                this.speed = speed;
-                this.x = x;
-                this.x0 = x0;
-                this.xMax = xMax;
-                this.xMin = xMin;
-            }
-        }
-
-        public struct MonsterCarnival
-        {
-            public int deathCP;
-            public string effectLose, effectWin;
-            public int[] guardian;
-            public int[] mobID;
-            public int[] mobTime;
-            public int[] spendCP;
-            //guardianGenPos and mobGenPos are in the editor
-            public int mapDivided, reactorBlue, reactorRed;
-            public float rewardClimax;
-            public int[] reward_cpDiff;
-            public float[] probChange_loseCoin;
-            public float[] probChange_loseCP;
-            public float[] probChange_loseNuff;
-            public float[] probChange_loseRecovery;
-            public float[] probChange_wInCoin;
-            public float[] probChange_winCP;
-            public float[] probChange_winNuff;
-            public float[] probChange_winRecovery;
-            public int rewardMapLose, rewardMapWin;
-            public int[] skill;
-            public string soundLose, soundWin;
-            public int timeDefault, timeExpand, timeFinish, timeMessage;
         }
     }
 }

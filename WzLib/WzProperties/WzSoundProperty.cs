@@ -44,7 +44,7 @@ namespace MapleLib.WzLib.WzProperties
 
         public override WzImageProperty DeepClone()
         {
-            WzSoundProperty clone = (WzSoundProperty)MemberwiseClone();
+            WzSoundProperty clone = new WzSoundProperty(name, len_ms, header, mp3bytes);
             return clone;
         }
 

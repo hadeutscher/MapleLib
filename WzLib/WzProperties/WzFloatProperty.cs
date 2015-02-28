@@ -40,7 +40,7 @@ namespace MapleLib.WzLib.WzProperties
 
         public override WzImageProperty DeepClone()
         {
-            WzFloatProperty clone = (WzFloatProperty)MemberwiseClone();
+            WzFloatProperty clone = new WzFloatProperty(name, val);
             return clone;
         }
 

@@ -48,9 +48,7 @@ namespace MapleLib.WzLib.WzProperties
 
         public override WzImageProperty DeepClone()
         {
-            WzVectorProperty clone = (WzVectorProperty)MemberwiseClone();
-            clone.x = (WzIntProperty)x.DeepClone();
-            clone.y = (WzIntProperty)y.DeepClone();
+            WzVectorProperty clone = new WzVectorProperty(name, x, y);
             return clone;
         }
 

@@ -136,10 +136,10 @@ namespace MapleLib.WzLib
         public WzImage DeepClone()
         {
             if (reader != null && !parsed) ParseImage();
-            WzImage clone = (WzImage)MemberwiseClone();
-            clone.properties = new List<WzImageProperty>();
+            WzImage clone = new WzImage(name);
+            clone.changed = true;
             foreach (WzImageProperty prop in properties)
-                clone.properties.Add(prop.DeepClone());
+                clone.AddProperty(prop.DeepClone());
             return clone;
         }
 

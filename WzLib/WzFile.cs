@@ -85,7 +85,7 @@ namespace MapleLib.WzLib
 
 		public override WzObject Parent { get { return null; } internal set { } }
 
-        public override /*I*/WzFile WzFileParent { get { return this; } }
+        public override WzFile WzFileParent { get { return this; } }
 
 		public override void Dispose()
 		{

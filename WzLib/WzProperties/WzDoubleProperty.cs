@@ -39,7 +39,7 @@ namespace MapleLib.WzLib.WzProperties
 
         public override WzImageProperty DeepClone()
         {
-            WzDoubleProperty clone = (WzDoubleProperty)MemberwiseClone();
+            WzDoubleProperty clone = new WzDoubleProperty(name, val);
             return clone;
         }
 
