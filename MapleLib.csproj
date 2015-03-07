@@ -103,6 +103,7 @@
     <Compile Include="PacketLib\SocketInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WzLib\WzImageProperty.cs" />
+    <Compile Include="WzLib\WzImageResource.cs" />
     <Compile Include="WzLib\WzObject.cs" />
     <Compile Include="WzLib\Util\WzBinaryReader.cs" />
     <Compile Include="WzLib\Util\WzBinaryWriter.cs" />

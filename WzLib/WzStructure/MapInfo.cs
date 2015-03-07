@@ -218,11 +218,11 @@ namespace MapleLib.WzLib.WzStructure
                     case "noRegenMap":
                         noRegenMap = InfoTool.GetBool(prop);
                         break;
-                    case "allowedItems":
-                        allowedItems = new List<int>();
+                    case "allowedItem":
+                        allowedItem = new List<int>();
                         if (prop.WzProperties != null && prop.WzProperties.Count > 0)
                             foreach (WzImageProperty item in prop.WzProperties)
-                                allowedItems.Add(item.GetInt());
+                                allowedItem.Add(item.GetInt());
                         break;
                     case "recovery":
                         recovery = InfoTool.GetFloat(prop);
@@ -296,15 +296,15 @@ namespace MapleLib.WzLib.WzStructure
             info["lvLimit"] = InfoTool.SetOptionalInt(lvLimit);
             info["onFirstUserEnter"] = InfoTool.SetOptionalString(onFirstUserEnter);
             info["onUserEnter"] = InfoTool.SetOptionalString(onUserEnter);
-            info["fly"] = InfoTool.SetBool(fly);
-            info["noMapCmd"] = InfoTool.SetBool(noMapCmd);
-            info["partyOnly"] = InfoTool.SetBool(partyOnly);
+            info["fly"] = InfoTool.SetOptionalBool(fly);
+            info["noMapCmd"] = InfoTool.SetOptionalBool(noMapCmd);
+            info["partyOnly"] = InfoTool.SetOptionalBool(partyOnly);
             info["fieldType"] = InfoTool.SetOptionalInt((int?)fieldType);
-            info["miniMapOnOff"] = InfoTool.SetBool(miniMapOnOff);
-            info["reactorShuffle"] = InfoTool.SetBool(reactorShuffle);
+            info["miniMapOnOff"] = InfoTool.SetOptionalBool(miniMapOnOff);
+            info["reactorShuffle"] = InfoTool.SetOptionalBool(reactorShuffle);
             info["reactorShuffleName"] = InfoTool.SetOptionalString(reactorShuffleName);
-            info["personalShop"] = InfoTool.SetBool(personalShop);
-            info["entrustedShop"] = InfoTool.SetBool(entrustedShop);
+            info["personalShop"] = InfoTool.SetOptionalBool(personalShop);
+            info["entrustedShop"] = InfoTool.SetOptionalBool(entrustedShop);
             info["effect"] = InfoTool.SetOptionalString(effect);
             info["lvForceMove"] = InfoTool.SetOptionalInt(lvForceMove);
             if (timeMob != null) 
@@ -317,8 +317,8 @@ namespace MapleLib.WzLib.WzStructure
                 info["timeMob"] = prop;
             }
             info["help"] = InfoTool.SetOptionalString(help);
-            info["snow"] = InfoTool.SetBool(snow);
-            info["rain"] = InfoTool.SetBool(rain);
+            info["snow"] = InfoTool.SetOptionalBool(snow);
+            info["rain"] = InfoTool.SetOptionalBool(rain);
             info["dropExpire"] = InfoTool.SetOptionalInt(dropExpire);
             info["decHP"] = InfoTool.SetOptionalInt(decHP);
             info["decInterval"] = InfoTool.SetOptionalInt(decInterval);
@@ -331,30 +331,33 @@ namespace MapleLib.WzLib.WzStructure
                 prop["prop"] = InfoTool.SetOptionalInt(autoLieDetector.Value.prop);
                 info["autoLieDetector"] = prop;
             }
-            info["expeditionOnly"] = InfoTool.SetBool(expeditionOnly);
+            info["expeditionOnly"] = InfoTool.SetOptionalBool(expeditionOnly);
             info["fs"] = InfoTool.SetOptionalFloat(fs);
             info["protectItem"] = InfoTool.SetOptionalInt(protectItem);
             info["createMobInterval"] = InfoTool.SetOptionalInt(createMobInterval);
             info["fixedMobCapacity"] = InfoTool.SetOptionalInt(fixedMobCapacity);
             info["streetName"] = InfoTool.SetOptionalString(streetName);
-            info["noRegenMap"] = InfoTool.SetBool(noRegenMap);
-            if (allowedItems != null)
+            info["noRegenMap"] = InfoTool.SetOptionalBool(noRegenMap);
+            if (allowedItem != null)
             {
                 WzSubProperty prop = new WzSubProperty();
-                ErrorLogger.Log(ErrorLevel.MissingFeature, "I don't know how to repack allowedItems");
-                info["allowedItems"] = prop;
+                for (int i = 0; i < allowedItem.Count; i++)
+                {
+                    prop[i.ToString()] = InfoTool.SetInt(allowedItem[i]);
+                }
+                info["allowedItem"] = prop;
             }
             info["recovery"] = InfoTool.SetOptionalFloat(recovery);
-            info["blockPBossChange"] = InfoTool.SetBool(blockPBossChange);
-            info["everlast"] = InfoTool.SetBool(everlast);
-            info["damageCheckFree"] = InfoTool.SetBool(damageCheckFree);
+            info["blockPBossChange"] = InfoTool.SetOptionalBool(blockPBossChange);
+            info["everlast"] = InfoTool.SetOptionalBool(everlast);
+            info["damageCheckFree"] = InfoTool.SetOptionalBool(damageCheckFree);
             info["dropRate"] = InfoTool.SetOptionalFloat(dropRate);
-            info["scrollDisable"] = InfoTool.SetBool(scrollDisable);
-            info["needSkillForFly"] = InfoTool.SetBool(needSkillForFly);
-            info["zakum2Hack"] = InfoTool.SetBool(zakum2Hack);
-            info["allMoveCheck"] = InfoTool.SetBool(allMoveCheck);
-            info["VRLimit"] = InfoTool.SetBool(VRLimit);
-            info["consumeItemCoolTime"] = InfoTool.SetBool(consumeItemCoolTime);
+            info["scrollDisable"] = InfoTool.SetOptionalBool(scrollDisable);
+            info["needSkillForFly"] = InfoTool.SetOptionalBool(needSkillForFly);
+            info["zakum2Hack"] = InfoTool.SetOptionalBool(zakum2Hack);
+            info["allMoveCheck"] = InfoTool.SetOptionalBool(allMoveCheck);
+            info["VRLimit"] = InfoTool.SetOptionalBool(VRLimit);
+            info["consumeItemCoolTime"] = InfoTool.SetOptionalBool(consumeItemCoolTime);
             foreach (WzImageProperty prop in additionalProps) 
             {
                 info.AddProperty(prop);
@@ -421,7 +424,7 @@ namespace MapleLib.WzLib.WzStructure
         public string streetName = null;
         public MapleBool miniMapOnOff = null;
         public MapleBool noRegenMap = null; //610030400
-        public List<int> allowedItems = null;
+        public List<int> allowedItem = null;
         public float? recovery = null; //recovery rate, like in sauna (3)
         public MapleBool blockPBossChange = null; //something with monster carnival
         public MapleBool everlast = null; //something with bonus stages of PQs
