@@ -6,7 +6,6 @@ using System.Text;
 
 namespace MapleLib.WzLib.WzStructure.Data
 {
-    //read "MapleTable" out loud, lulz are guaranteed
     public class MapleTable<T> : Hashtable
     {
         public T this[string id]
