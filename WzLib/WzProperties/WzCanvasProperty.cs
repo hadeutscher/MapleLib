@@ -89,6 +89,19 @@ namespace MapleLib.WzLib.WzProperties
                         return iwp;
 				return null;
 			}
+            set
+            {
+                if (value != null)
+                {
+                    if (name == "PNG")
+                    {
+                        imageProp = (WzPngProperty)value;
+                        return;
+                    }
+                    value.Name = name;
+                    AddProperty(value);
+                }
+            }
 		}
 
         public WzImageProperty GetProperty(string name)

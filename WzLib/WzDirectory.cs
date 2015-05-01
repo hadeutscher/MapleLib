@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using System.IO;
 using MapleLib.WzLib.Util;
+using System;
 
 namespace MapleLib.WzLib
 {
@@ -114,6 +115,19 @@ namespace MapleLib.WzLib
 				//throw new KeyNotFoundException("No wz image or directory was found with the specified name");
 				return null;
 			}
+            set
+            {
+                if (value != null)
+                {
+                    value.Name = name;
+                    if (value is WzDirectory)
+                        AddDirectory((WzDirectory)value);
+                    else if (value is WzImage)
+                        AddImage((WzImage)value);
+                    else
+                        throw new ArgumentException("Value must be a Directory or Image");
+                }
+            }
 		}
 
 
