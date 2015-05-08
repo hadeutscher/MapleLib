@@ -31,12 +31,15 @@ namespace MapleLib.WzLib.WzStructure
     {
         public static MapInfo Default = new MapInfo();
 
+        private WzImage image = null;
+
         public MapInfo()
         {
         }
 
         public MapInfo(WzImage image, string strMapName, string strStreetName, string strCategoryName)
         {
+            this.image = image;
             int? startHour;
             int? endHour;
             this.strMapName = strMapName;
@@ -263,6 +266,11 @@ namespace MapleLib.WzLib.WzStructure
                         break;
                 }
             }
+        }
+
+        public static Rectangle? GetVR(WzImage image)
+        {
+            Rectangle? result = null;
             if (image["info"]["VRLeft"] != null)
             {
                 WzImageProperty info = image["info"];
@@ -270,12 +278,12 @@ namespace MapleLib.WzLib.WzStructure
                 int right = InfoTool.GetInt(info["VRRight"]);
                 int top = InfoTool.GetInt(info["VRTop"]);
                 int bottom = InfoTool.GetInt(info["VRBottom"]);
-                VR = new Rectangle(left, top, right - left, bottom - top);
-                officialVR = true;
+                result = new Rectangle(left, top, right - left, bottom - top);
             }
+            return result;
         }
 
-        public void Save(WzImage dest)
+        public void Save(WzImage dest, Rectangle? VR)
         {
             WzSubProperty info = new WzSubProperty();
             info["bgm"] = InfoTool.SetString(bgm);
@@ -362,7 +370,7 @@ namespace MapleLib.WzLib.WzStructure
             {
                 info.AddProperty(prop);
             }
-            if (officialVR)
+            if (VR.HasValue)
             {
                 info["VRLeft"] = InfoTool.SetInt(VR.Value.Left);
                 info["VRRight"] = InfoTool.SetInt(VR.Value.Right);
@@ -438,8 +446,6 @@ namespace MapleLib.WzLib.WzStructure
         public MapleBool consumeItemCoolTime = null; //cool time of consume item
 
         //Special
-        public bool officialVR = false;
-        public Rectangle? VR = null;
         public List<WzImageProperty> additionalProps = new List<WzImageProperty>();
         public List<WzImageProperty> additionalNonInfoProps = new List<WzImageProperty>();
         public string strMapName = "<Untitled>";
@@ -449,6 +455,12 @@ namespace MapleLib.WzLib.WzStructure
 
         //Editor related, not actual properties
         public MapType mapType = MapType.RegularMap;
+
+        public WzImage Image
+        {
+            get { return image; }
+            set { image = value; }
+        }
 
         public struct TimeMob
         {
