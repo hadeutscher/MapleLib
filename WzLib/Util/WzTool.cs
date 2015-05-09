@@ -97,20 +97,6 @@ namespace MapleLib.WzLib.Util
 			}
 		}
 
-        public static bool AESSelfCheck(ref string exceptionResult)
-        {
-            try
-            {
-                byte[] foo = WzKeyGenerator.GenerateWzKey(GetIvByMapleVersion(WzMapleVersion.GMS));
-                return true;
-            }
-            catch (Exception e)
-            {
-                exceptionResult = e.Message;
-                return false;
-            }
-        }
-
 		public static byte[] GetIvByMapleVersion(WzMapleVersion ver)
 		{
 			switch (ver)
