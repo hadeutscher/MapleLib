@@ -135,6 +135,11 @@ namespace MapleLib.WzLib
             throw new NotImplementedException();
         }
 
+        public virtual long GetLong()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual float GetFloat()
         {
             throw new NotImplementedException();
