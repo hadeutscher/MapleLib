@@ -151,6 +151,16 @@ namespace MapleLib.WzLib.Util
 			return sb;
 		}
 
+        public long ReadLong()
+        {
+            sbyte sb = base.ReadSByte();
+            if (sb == sbyte.MinValue)
+            {
+                return ReadInt64();
+            }
+            return sb;
+        }
+
 		public uint ReadOffset()
 		{
 			uint offset = (uint)BaseStream.Position;

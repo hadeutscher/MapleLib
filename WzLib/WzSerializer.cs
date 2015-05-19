@@ -153,6 +153,11 @@ namespace MapleLib.WzLib.Serialization
                 WzShortProperty property10 = (WzShortProperty)prop;
                 tw.Write(string.Concat(new object[] { depth, "<short name=\"", XmlUtil.SanitizeText(property10.Name), "\" value=\"", property10.Value, "\"/>" }) + lineBreak);
             }
+            else if (prop is WzLongProperty)
+            {
+                WzLongProperty long_prop = (WzLongProperty)prop;
+                tw.Write(string.Concat(new object[] { depth, "<long name=\"", XmlUtil.SanitizeText(long_prop.Name), "\" value=\"", long_prop.Value, "\"/>" }) + lineBreak);
+            }
             else if (prop is WzUOLProperty)
             {
                 WzUOLProperty property11 = (WzUOLProperty)prop;
@@ -654,6 +659,10 @@ namespace MapleLib.WzLib.Serialization
                 case "short":
                     WzShortProperty shortProp = new WzShortProperty(element.GetAttribute("name"), short.Parse(element.GetAttribute("value"), formattingInfo));
                     return shortProp;
+
+                case "long":
+                    WzLongProperty longProp = new WzLongProperty(element.GetAttribute("name"), long.Parse(element.GetAttribute("value"), formattingInfo));
+                    return longProp;
 
                 case "uol":
                     WzUOLProperty uol = new WzUOLProperty(element.GetAttribute("name"), element.GetAttribute("value"));

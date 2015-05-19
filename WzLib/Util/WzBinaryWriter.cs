@@ -207,6 +207,19 @@ namespace MapleLib.WzLib.Util
 			}
 		}
 
+        public void WriteCompressedLong(long value)
+        {
+            if (value > sbyte.MaxValue || value <= sbyte.MinValue)
+            {
+                Write(sbyte.MinValue);
+                Write(value);
+            }
+            else
+            {
+                Write((sbyte)value);
+            }
+        }
+
 		public void WriteOffset(uint value)
 		{
 			uint encOffset = (uint)BaseStream.Position;

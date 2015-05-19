@@ -208,6 +208,11 @@ namespace MapleLib.WzLib.WzProperties
             return LinkValue.GetShort();
         }
 
+        public override long GetLong()
+        {
+            return LinkValue.GetLong();
+        }
+
         public override float GetFloat()
         {
             return LinkValue.GetFloat();

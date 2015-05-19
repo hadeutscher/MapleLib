@@ -22,6 +22,7 @@ namespace MapleLib.WzLib
 		Null,
 		Short,
 		Int,
+        Long,
 		Float,
 		Double,
 		String,

@@ -122,8 +122,12 @@ namespace MapleLib.WzLib
 						properties.Add(new WzShortProperty(name, reader.ReadInt16()) { Parent = parent });
 						break;
 					case 3:
+                    case 19:
 						properties.Add(new WzIntProperty(name, reader.ReadCompressedInt()) { Parent = parent });
 						break;
+                    case 20:
+                        properties.Add(new WzLongProperty(name, reader.ReadLong()) { Parent = parent });
+                        break;
 					case 4:
 						byte type = reader.ReadByte();
 						if (type == 0x80)

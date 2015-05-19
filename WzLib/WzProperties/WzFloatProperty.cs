@@ -137,6 +137,11 @@ namespace MapleLib.WzLib.WzProperties
             return (short)val;
         }
 
+        public override long GetLong()
+        {
+            return (long)val;
+        }
+
         public override string ToString()
         {
             return val.ToString();
