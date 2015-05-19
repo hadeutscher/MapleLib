@@ -115,6 +115,11 @@ namespace MapleLib.WzLib.WzProperties
             return val;
         }
 
+        public override long GetLong()
+        {
+            return (long)val;
+        }
+
         public override int GetInt()
         {
             return (int)val;
