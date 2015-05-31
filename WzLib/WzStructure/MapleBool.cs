@@ -17,16 +17,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace MapleLib.WzLib.WzStructure
 {
+    [DataContract]
     public struct MapleBool //I know I could have used the nullable bool.
     {
         public const byte NotExist = 0;
         public const byte False = 1;
         public const byte True = 2;
 
+        [DataMember]
         private byte val { get; set; }
         public static implicit operator MapleBool(byte value)
         {
@@ -47,6 +50,11 @@ namespace MapleLib.WzLib.WzStructure
         public static implicit operator bool(MapleBool value)
         {
             return value == MapleBool.True;
+        }
+
+        public static implicit operator byte(MapleBool value)
+        {
+            return value.val;
         }
 
         public override bool Equals(object obj)
