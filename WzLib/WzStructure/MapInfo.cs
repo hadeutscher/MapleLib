@@ -462,6 +462,12 @@ namespace MapleLib.WzLib.WzStructure
             set { image = value; }
         }
 
+        public bool ShouldSerializeImage()
+        {
+            // To keep JSON.NET from serializing this
+            return false;
+        }
+
         public struct TimeMob
         {
             public int? startHour, endHour;
