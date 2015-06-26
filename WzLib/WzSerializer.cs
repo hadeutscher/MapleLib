@@ -399,7 +399,7 @@ namespace MapleLib.WzLib.Serialization
             {
                 outPath += currObj.Name + @"\";
                 if (!Directory.Exists(outPath)) Directory.CreateDirectory(outPath);
-                bool parse = ((WzImage)currObj).Parsed;
+                bool parse = ((WzImage)currObj).Parsed || ((WzImage)currObj).Changed;
                 if (!parse) ((WzImage)currObj).ParseImage();
                 foreach (WzImageProperty subprop in ((IPropertyContainer)currObj).WzProperties)
                     ExportRecursion(subprop, outPath);
@@ -425,7 +425,7 @@ namespace MapleLib.WzLib.Serialization
 
         private void exportXmlInternal(WzImage img, string path)
         {
-            bool parsed = img.Parsed;
+            bool parsed = img.Parsed || img.Changed;
             if (!parsed) img.ParseImage();
             curr++;
             TextWriter tw = new StreamWriter(path);
@@ -475,7 +475,7 @@ namespace MapleLib.WzLib.Serialization
 
         internal void DumpImageToXML(TextWriter tw, string depth, WzImage img)
         {
-            bool parsed = img.Parsed;
+            bool parsed = img.Parsed || img.Changed;
             if (!parsed) img.ParseImage();
             curr++;
             tw.Write(depth + "<wzimg name=\"" + XmlUtil.SanitizeText(img.Name) + "\">" + lineBreak);
