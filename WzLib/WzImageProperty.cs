@@ -112,7 +112,8 @@ namespace MapleLib.WzLib
 			for (int i = 0; i < entryCount; i++)
 			{
 				string name = reader.ReadStringBlock(offset);
-				switch (reader.ReadByte())
+                byte ptype = reader.ReadByte();
+				switch (ptype)
 				{
 					case 0:
 						properties.Add(new WzNullProperty(name) { Parent = parent });
