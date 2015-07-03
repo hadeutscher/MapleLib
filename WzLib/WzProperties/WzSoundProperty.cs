@@ -18,6 +18,8 @@ using System.IO;
 using System;
 using MapleLib.WzLib.Util;
 using NAudio.Wave;
+using MapleLib.Helpers;
+using System.Text;
 
 namespace MapleLib.WzLib.WzProperties
 {
@@ -31,13 +33,26 @@ namespace MapleLib.WzLib.WzProperties
 		internal byte[] mp3bytes = null;
 		internal WzObject parent;
         internal int len_ms;
-        internal int frequency;
-        //internal byte bps;
         internal byte[] header;
 		//internal WzImage imgParent;
         internal WzBinaryReader wzReader;
         internal long offs;
-        public static readonly byte[] soundHeaderMask = new byte[] { 0x02, 0x83, 0xEB, 0x36, 0xE4, 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70, 0x8B, 0xEB, 0x36, 0xE4, 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70, 0x00, 0x01, 0x81, 0x9F, 0x58, 0x05, 0x56, 0xC3, 0xCE, 0x11, 0xBF, 0x01, 0x00, 0xAA, 0x00, 0x55, 0x59, 0x5A, 0x1E, 0x55, 0x00, 0x02, 0x00,/*FRQ 56*/0xAA, 0xBB, 0xCC, 0xDD/*/FRQ 59*/, 0x10, 0x27, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0A, 0x02, 0x01, 0x00, 0x00, 0x00 };
+        public static readonly int header_len = 82;
+        public static readonly byte[] soundHeader = new byte[] { 0x02, 0x83, 0xEB, 0x36, 0xE4, 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70, 0x8B, 0xEB, 0x36, 0xE4, 0x4F, 0x52, 0xCE, 0x11, 0x9F, 0x53, 0x00, 0x20, 0xAF, 0x0B, 0xA7, 0x70, 0x00, 0x01, 0x81, 0x9F, 0x58, 0x05, 0x56, 0xC3, 0xCE, 0x11, 0xBF, 0x01, 0x00, 0xAA, 0x00, 0x55, 0x59 };
+        internal int unk0 = 0x551E5A;
+        internal short channels;
+        internal int frequency;
+        internal int byterate;
+        internal short unk1 = 1;
+        internal short unk2 = 0;
+        internal short extraSize;
+        internal short unk4 = 1;
+        internal short unk5 = 2;
+        internal short unk6 = 0;
+        internal short blockSize;
+        internal short unk8 = 1;
+        internal short unk9 = 0; // can be large numbers
+
 		#endregion
 
 		#region Inherited Members
@@ -52,7 +67,7 @@ namespace MapleLib.WzLib.WzProperties
 
         public override void SetValue(object value)
         {
-            if (value is byte[]) SetBytes((byte[])value);
+            return;
         }
 		/// <summary>
 		/// The parent of the object
@@ -72,7 +87,6 @@ namespace MapleLib.WzLib.WzProperties
 		public override WzPropertyType PropertyType { get { return WzPropertyType.Sound; } }
 		public override void WriteValue(WzBinaryWriter writer)
 		{
-            this.header = CreateHeader(this.frequency);
             byte[] data = GetBytes(false);
 			writer.WriteStringValue("Sound_DX8", 0x73, 0x1B);
 			writer.Write((byte)0);
@@ -127,7 +141,7 @@ namespace MapleLib.WzLib.WzProperties
             //note - soundDataLen does NOT include the length of the header.
             int soundDataLen = reader.ReadCompressedInt();
             len_ms = reader.ReadCompressedInt();
-            header = reader.ReadBytes(soundHeaderMask.Length);
+            header = reader.ReadBytes(header_len);
             ParseHeader();
             if (parseNow)
                 mp3bytes = reader.ReadBytes(soundDataLen);
@@ -168,27 +182,83 @@ namespace MapleLib.WzLib.WzProperties
             this.name = name;
             Mp3FileReader reader = new Mp3FileReader(file);
             this.len_ms = (int)((double)reader.Length * 1000d / (double)reader.WaveFormat.AverageBytesPerSecond);
-            this.frequency = reader.WaveFormat.SampleRate;
-            //this.bps = (byte)reader.WaveFormat.BitsPerSample;
-            this.header = CreateHeader(this.frequency);
+            this.channels = (short)reader.Mp3WaveFormat.Channels;
+            this.frequency = reader.Mp3WaveFormat.SampleRate;
+            this.byterate = reader.Mp3WaveFormat.AverageBytesPerSecond;
+            this.extraSize = (short)reader.Mp3WaveFormat.ExtraSize;
+            this.blockSize = (short)reader.Mp3WaveFormat.blockSize;
+            RebuildHeader();
             reader.Dispose();
             this.mp3bytes = File.ReadAllBytes(file);
         }
 
-        public static byte[] CreateHeader(int frequency)
+        public static bool memcmp(byte[] a, byte[] b, int n)
         {
-            byte[] frequencyBytes = BitConverter.GetBytes(frequency);
-            byte[] headerBytes = new byte[soundHeaderMask.Length];
-            Array.Copy(soundHeaderMask, headerBytes, headerBytes.Length);
-            Array.Copy(frequencyBytes, 0, headerBytes, 56, 4);
-            //headerBytes[60] = bps;
-            return headerBytes;
+            for (int i = 0; i < n; i++)
+            {
+                if (a[i] != b[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static string ByteArrayToString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 3);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2} ", b);
+            return hex.ToString();
+        }
+
+        public void RebuildHeader()
+        {
+            using (BinaryWriter bw = new BinaryWriter(new MemoryStream()))
+            {
+                bw.Write(soundHeader);
+                bw.Write(unk0);
+                bw.Write(channels);
+                bw.Write(frequency);
+                bw.Write(byterate);
+                bw.Write(unk1);
+                bw.Write(unk2);
+                bw.Write(extraSize);
+                bw.Write(unk4);
+                bw.Write(unk5);
+                bw.Write(unk6);
+                bw.Write(blockSize);
+                bw.Write(unk8);
+                bw.Write(unk9);
+                header = ((MemoryStream)bw.BaseStream).ToArray();
+            }
+        }
+
+        private void LogSoundHeader()
+        {
+            ErrorLogger.Log(ErrorLevel.MissingFeature, "Weird sound header: " + ByteArrayToString(header));
         }
 
         private void ParseHeader()
         {
-            this.frequency = BitConverter.ToInt32(header, 56);
-            //this.bps = header[60];
+            using (BinaryReader br = new BinaryReader(new MemoryStream(header)))
+            {
+                if (!memcmp(br.ReadBytes(soundHeader.Length), soundHeader,soundHeader.Length))
+                    LogSoundHeader();
+                unk0 = br.ReadInt32();
+                channels = br.ReadInt16();
+                frequency = br.ReadInt32();
+                byterate = br.ReadInt32();
+                unk1 = br.ReadInt16();
+                unk2 = br.ReadInt16();
+                extraSize = br.ReadInt16();
+                unk4 = br.ReadInt16();
+                unk5 = br.ReadInt16();
+                unk6 = br.ReadInt16();
+                blockSize = br.ReadInt16();
+                unk8 = br.ReadInt16();
+                unk9 = br.ReadInt16();
+            }
         }
         #endregion
 
@@ -204,7 +274,7 @@ namespace MapleLib.WzLib.WzProperties
                 wzReader.BaseStream.Position = offs;
                 int soundDataLen = wzReader.ReadCompressedInt();
                 wzReader.ReadCompressedInt();
-                wzReader.BaseStream.Position += soundHeaderMask.Length;
+                wzReader.BaseStream.Position += header_len;
                 mp3bytes = wzReader.ReadBytes(soundDataLen);
                 wzReader.BaseStream.Position = currentPos;
                 if (saveInMemory)
@@ -216,11 +286,6 @@ namespace MapleLib.WzLib.WzProperties
                     return result;
                 }
             }
-        }
-
-        public void SetBytes(byte[] bytes)
-        {
-            mp3bytes = bytes;
         }
 
         public void SaveToFile(string file)
