@@ -243,8 +243,7 @@ namespace MapleLib.WzLib.WzProperties
         {
             using (BinaryReader br = new BinaryReader(new MemoryStream(header)))
             {
-                if (!memcmp(br.ReadBytes(soundHeader.Length), soundHeader,soundHeader.Length))
-                    LogSoundHeader();
+                br.ReadBytes(soundHeader.Length);
                 unk0 = br.ReadInt32();
                 channels = br.ReadInt16();
                 frequency = br.ReadInt32();
