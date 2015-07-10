@@ -329,6 +329,9 @@ namespace MapleLib.WzLib.WzProperties
                         }
                     }
                     break;
+                default:
+                    Helpers.ErrorLogger.Log(Helpers.ErrorLevel.MissingFeature, string.Format("Unknown PNG format {0} {1}", format, format2));
+                    break;
             }
             png = bmp;
         }
