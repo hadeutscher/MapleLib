@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\ErrorLogger.cs" />
+    <Compile Include="WzLib\Util\WzMutableKey.cs" />
     <Compile Include="WzLib\WzExtended.cs" />
     <Compile Include="MapleCryptoLib\AESEncryption.cs" />
     <Compile Include="MapleCryptoLib\CryptoConstants.cs" />

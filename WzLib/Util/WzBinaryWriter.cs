@@ -28,7 +28,7 @@ namespace MapleLib.WzLib.Util
 	public class WzBinaryWriter : BinaryWriter
 	{
 		#region Properties
-		public byte[] WzKey { get; set; }
+		public WzMutableKey WzKey { get; set; }
 		public uint Hash { get; set; }
 		public Hashtable StringCache { get; set; }
 		public WzHeader Header { get; set; }
@@ -42,7 +42,7 @@ namespace MapleLib.WzLib.Util
 		public WzBinaryWriter(Stream output, byte[] WzIv, bool leaveOpen)
 			: base(output)
 		{
-			WzKey = WzKeyGenerator.GenerateWzKey(WzIv);
+			WzKey = WzKeyGenerator.GenerateWzMutableKey(WzIv);
 			StringCache = new Hashtable();
 			this.LeaveOpen = leaveOpen;
 		}
