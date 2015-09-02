@@ -24,7 +24,7 @@ namespace MapleLib.WzLib.Util
 	public class WzBinaryReader : BinaryReader
 	{
 		#region Properties
-		public WzMutableKey WzKey { get; set; }
+		public byte[] WzKey { get; set; }
 		public uint Hash { get; set; }
 		public WzHeader Header { get; set; }
 		#endregion
@@ -33,7 +33,7 @@ namespace MapleLib.WzLib.Util
 		public WzBinaryReader(Stream input, byte[] WzIv)
 			: base(input)
 		{
-			WzKey = WzKeyGenerator.GenerateWzMutableKey(WzIv);
+			WzKey = WzKeyGenerator.GenerateWzKey(WzIv);
 		}
 		#endregion
 

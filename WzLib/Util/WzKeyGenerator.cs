@@ -101,11 +101,6 @@ namespace MapleLib.WzLib.Util
 
 			return wzKey;
 		}
-
-        public static WzMutableKey GenerateWzMutableKey(byte[] WzIv)
-        {
-            return new WzMutableKey(WzIv, CryptoConstants.getTrimmedUserKey());
-        }
-        #endregion
-    }
+		#endregion
+	}
 }

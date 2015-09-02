@@ -176,35 +176,39 @@ namespace MapleLib.WzLib
 		/// <param name="path">path to object</param>
 		/// <returns>the selected WzImageProperty</returns>
 		public WzImageProperty GetFromPath(string path)
-        {
-            if (reader != null) if (!parsed) ParseImage();
+		{
+			if (reader != null) if (!parsed) ParseImage();
 
-            string[] segments = path.Split(new char[1] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
-            if (segments[0] == "..")
-            {
-                return null;
-            }
+			string[] segments = path.Split(new char[1] { '/' }, System.StringSplitOptions.RemoveEmptyEntries);
+			if (segments[0] == "..")
+			{
+				return null;
+			}
 
-            WzImageProperty ret = null;
-            for (int x = 0; x < segments.Length; x++)
-            {
-                bool foundChild = false;
-                foreach (WzImageProperty iwp in (ret == null ? this.properties : ret.WzProperties))
-                {
-                    if (iwp.Name == segments[x])
-                    {
+			//hack method of adding the properties
+			WzSubProperty childProperties = new WzSubProperty();
+			childProperties.AddProperties(properties);
+
+			WzImageProperty ret = childProperties;
+			for (int x = 0; x < segments.Length; x++)
+			{
+				bool foundChild = false;
+				foreach (WzImageProperty iwp in ret.WzProperties)
+				{
+					if (iwp.Name == segments[x])
+					{
                         ret = iwp;
-                        foundChild = true;
-                        break;
-                    }
-                }
-                if (!foundChild)
-                {
-                    return null;
-                }
-            }
-            return ret;
-        }
+						foundChild = true;
+						break;
+					}
+				}
+				if (!foundChild)
+				{
+					return null;
+				}
+			}
+			return ret;
+		}
 
         /// <summary>
         /// Adds a property to the image

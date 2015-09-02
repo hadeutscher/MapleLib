@@ -329,18 +329,6 @@ namespace MapleLib.WzLib.WzProperties
                         }
                     }
                     break;
-
-                case 1026:
-                    bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-                    bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                    uncompressedSize = width * height;
-                    decBuf = new byte[uncompressedSize];
-                    zlib.Read(decBuf, 0, uncompressedSize);
-                    decBuf = GetPixelDataDXT3(decBuf, Width, Height);
-                    Marshal.Copy(decBuf, 0, bmpData.Scan0, decBuf.Length);
-                    bmp.UnlockBits(bmpData);
-                    break;
-
                 default:
                     Helpers.ErrorLogger.Log(Helpers.ErrorLevel.MissingFeature, string.Format("Unknown PNG format {0} {1}", format, format2));
                     break;
@@ -390,100 +378,6 @@ namespace MapleLib.WzLib.WzProperties
         public override Bitmap GetBitmap()
         {
             return GetPNG(false);
-        }
-        #endregion
-
-        #region DXT Format Parser
-        private static byte[] GetPixelDataDXT3(byte[] rawData, int width, int height)
-        {
-            byte[] pixel = new byte[width * height * 4];
-
-            Color[] colorTable = new Color[4];
-            int[] colorIdxTable = new int[16];
-            byte[] alphaTable = new byte[16];
-            for (int y = 0; y < height; y += 4)
-            {
-                for (int x = 0; x < width; x += 4)
-                {
-                    int off = x * 4 + y * width;
-                    ExpandAlphaTable(alphaTable, rawData, off);
-                    ushort u0 = BitConverter.ToUInt16(rawData, off + 8);
-                    ushort u1 = BitConverter.ToUInt16(rawData, off + 10);
-                    ExpandColorTable(colorTable, u0, u1);
-                    ExpandColorIndexTable(colorIdxTable, rawData, off + 12);
-
-                    for (int j = 0; j < 4; j++)
-                    {
-                        for (int i = 0; i < 4; i++)
-                        {
-                            SetPixel(pixel,
-                                x + i,
-                                y + j,
-                                width,
-                                colorTable[colorIdxTable[j * 4 + i]],
-                                alphaTable[j * 4 + i]);
-                        }
-                    }
-                }
-            }
-
-            return pixel;
-        }
-
-        private static void SetPixel(byte[] pixelData, int x, int y, int width, Color color, byte alpha)
-        {
-            int offset = (y * width + x) * 4;
-            pixelData[offset + 0] = color.B;
-            pixelData[offset + 1] = color.G;
-            pixelData[offset + 2] = color.R;
-            pixelData[offset + 3] = alpha;
-        }
-
-        private static void ExpandColorTable(Color[] color, ushort u0, ushort u1)
-        {
-            color[0] = RGB565ToColor(u0);
-            color[1] = RGB565ToColor(u1);
-            color[2] = System.Drawing.Color.FromArgb(0xff, (color[0].R * 2 + color[1].R + 1) / 3, (color[0].G * 2 + color[1].G + 1) / 3, (color[0].B * 2 + color[1].B + 1) / 3);
-            color[3] = System.Drawing.Color.FromArgb(0xff, (color[0].R + color[1].R * 2 + 1) / 3, (color[0].G + color[1].G * 2 + 1) / 3, (color[0].B + color[1].B * 2 + 1) / 3);
-        }
-
-        private static void ExpandColorIndexTable(int[] colorIndex, byte[] rawData, int offset)
-        {
-            for (int i = 0; i < 16; i += 4, offset++)
-            {
-                colorIndex[i + 0] = (rawData[offset] & 0x03);
-                colorIndex[i + 1] = (rawData[offset] & 0x0c) >> 2;
-                colorIndex[i + 2] = (rawData[offset] & 0x30) >> 4;
-                colorIndex[i + 3] = (rawData[offset] & 0xc0) >> 6;
-            }
-        }
-
-        private static void ExpandAlphaTable(byte[] alpha, byte[] rawData, int offset)
-        {
-            for (int i = 0; i < 16; i += 2, offset++)
-            {
-                alpha[i + 0] = (byte)(rawData[offset] & 0x0f);
-                alpha[i + 1] = (byte)((rawData[offset] & 0xf0) >> 4);
-            }
-            for (int i = 0; i < 16; i++)
-            {
-                alpha[i] = (byte)(alpha[i] | (alpha[i] << 4));
-            }
-        }
-
-        private static Color RGB565ToColor(ushort val)
-        {
-            const int rgb565_mask_r = 0xf800;
-            const int rgb565_mask_g = 0x07e0;
-            const int rgb565_mask_b = 0x001f;
-            int r = (val & rgb565_mask_r) >> 11;
-            int g = (val & rgb565_mask_g) >> 5;
-            int b = (val & rgb565_mask_b);
-            var c = Color.FromArgb(
-                (r << 3) | (r >> 2),
-                (g << 2) | (g >> 4),
-                (b << 3) | (b >> 2));
-            return c;
         }
         #endregion
     }
