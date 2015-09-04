@@ -40,6 +40,13 @@ namespace MapleLib.WzLib.Util
 
             size = (int)Math.Ceiling(1.0 * size / BatchSize) * BatchSize;
             byte[] newKeys = new byte[size];
+
+            if (BitConverter.ToInt32(this.iv, 0) == 0)
+            {
+                this.keys = newKeys;
+                return;
+            }
+
             int startIndex = 0;
 
             if (keys != null)
