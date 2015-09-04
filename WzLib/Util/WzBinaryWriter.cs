@@ -42,7 +42,7 @@ namespace MapleLib.WzLib.Util
 		public WzBinaryWriter(Stream output, byte[] WzIv, bool leaveOpen)
 			: base(output)
 		{
-			WzKey = WzKeyGenerator.GenerateWzMutableKey(WzIv);
+			WzKey = WzKeyGenerator.GenerateWzKey(WzIv);
 			StringCache = new Hashtable();
 			this.LeaveOpen = leaveOpen;
 		}

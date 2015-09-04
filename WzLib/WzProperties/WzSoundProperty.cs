@@ -22,6 +22,7 @@ using MapleLib.Helpers;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace MapleLib.WzLib.WzProperties
 {
@@ -38,7 +39,7 @@ namespace MapleLib.WzLib.WzProperties
         internal byte[] header;
 		//internal WzImage imgParent;
         internal WzBinaryReader wzReader;
-        internal bool headerEncrypted;
+        internal bool headerEncrypted = false;
         internal long offs;
         internal int soundDataLen;
         public static readonly byte[] soundHeader = new byte[] {
@@ -222,25 +223,61 @@ namespace MapleLib.WzLib.WzProperties
             using (BinaryWriter bw = new BinaryWriter(new MemoryStream()))
             {
                 bw.Write(soundHeader);
-                int len = Marshal.SizeOf(this.wavFormat);
-                byte[] wavHeader = new byte[len];
-                Marshal.StructureToPtr(this.wavFormat, Marshal.UnsafeAddrOfPinnedArrayElement(wavHeader, 0), false);
+                byte[] wavHeader = StructToBytes(wavFormat);
                 if (headerEncrypted)
                 {
-                    for (int i = 0; i < len; i++)
+                    for (int i = 0; i < wavHeader.Length; i++)
                     {
                         wavHeader[i] ^= this.wzReader.WzKey[i];
                     }
                 }
-                bw.Write((byte)len);
-                bw.Write(wavHeader, 0, len);
+                bw.Write((byte)wavHeader.Length);
+                bw.Write(wavHeader, 0, wavHeader.Length);
                 header = ((MemoryStream)bw.BaseStream).ToArray();
             }
         }
 
-        private void LogSoundHeader()
+        private static byte[] StructToBytes<T>(T obj)
         {
-            ErrorLogger.Log(ErrorLevel.MissingFeature, "Weird sound header: " + ByteArrayToString(header));
+            byte[] result = new byte[Marshal.SizeOf(obj)];
+            GCHandle handle = GCHandle.Alloc(result, GCHandleType.Pinned);
+            try
+            {
+                Marshal.StructureToPtr(obj, handle.AddrOfPinnedObject(), false);
+                return result;
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private static T BytesToStruct<T>(byte[] data) where T : new()
+        {
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                return Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private static T BytesToStructConstructorless<T>(byte[] data)
+        {
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
+                Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject(), obj);
+                return obj;
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         private void ParseHeader()
@@ -248,46 +285,40 @@ namespace MapleLib.WzLib.WzProperties
             byte[] wavHeader = new byte[header.Length - soundHeader.Length - 1];
             Buffer.BlockCopy(header, soundHeader.Length + 1, wavHeader, 0, wavHeader.Length);
 
-            using (BinaryReader br = new BinaryReader(new MemoryStream(wavHeader)))
-            {
-                br.BaseStream.Position = 16;
-                int extraSize = br.ReadInt16();
+            if (wavHeader.Length < Marshal.SizeOf<WaveFormat>())
+                return;
 
+            WaveFormat wavFmt = BytesToStruct<WaveFormat>(wavHeader);
                
-                if (extraSize + 18 != wavHeader.Length)
+            if (Marshal.SizeOf<WaveFormat>() + wavFmt.ExtraSize != wavHeader.Length)
+            {
+                //try decrypt
+                for (int i = 0; i < wavHeader.Length; i++)
                 {
-                    //try decrypt
-                    for (int i = 0; i < wavHeader.Length; i++)
-                    {
-                        wavHeader[i] ^= this.wzReader.WzKey[i];
-                    }
-                    br.BaseStream.Position = 16;
-                    extraSize = br.ReadInt16();
-
-                    if (extraSize + 18 != wavHeader.Length)
-                    {
-                        Debug.WriteLine("parse header failed.");
-                        return;
-                    }
-                    headerEncrypted = true;
+                    wavHeader[i] ^= this.wzReader.WzKey[i];
                 }
+                wavFmt = BytesToStruct<WaveFormat>(wavHeader);
 
-                br.BaseStream.Position = 0;
-                WaveFormat wavFmt = WaveFormat.FromFormatChunk(br, wavHeader.Length);
-
-                // parse to mp3 header
-                if (wavFmt.Encoding == WaveFormatEncoding.MpegLayer3)
+                if (Marshal.SizeOf<WaveFormat>() + wavFmt.ExtraSize != wavHeader.Length)
                 {
-                    wavFmt = new Mp3WaveFormat(wavFmt.SampleRate, wavFmt.Channels, wavFmt.BlockAlign, wavFmt.BitsPerSample);
-                    Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(wavHeader, 0), wavFmt);
+                    ErrorLogger.Log(ErrorLevel.Critical, "parse sound header failed");
+                    return;
                 }
-                else if (wavFmt.Encoding == WaveFormatEncoding.Pcm)
-                {
-                    wavFmt = new WaveFormat();
-                    Marshal.PtrToStructure(Marshal.UnsafeAddrOfPinnedArrayElement(wavHeader, 0), wavFmt);
-                }
+                headerEncrypted = true;
+            }
 
+            // parse to mp3 header
+            if (wavFmt.Encoding == WaveFormatEncoding.MpegLayer3 && wavHeader.Length >= Marshal.SizeOf<Mp3WaveFormat>())
+            {
+                this.wavFormat = BytesToStructConstructorless<Mp3WaveFormat>(wavHeader);
+            }
+            else if (wavFmt.Encoding == WaveFormatEncoding.Pcm)
+            {
                 this.wavFormat = wavFmt;
+            }
+            else
+            {
+                ErrorLogger.Log(ErrorLevel.MissingFeature, string.Format("Unknown wave encoding {0}", wavFmt.Encoding.ToString()));
             }
         }
         #endregion

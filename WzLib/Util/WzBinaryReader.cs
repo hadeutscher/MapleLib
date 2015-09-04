@@ -33,7 +33,7 @@ namespace MapleLib.WzLib.Util
 		public WzBinaryReader(Stream input, byte[] WzIv)
 			: base(input)
 		{
-			WzKey = WzKeyGenerator.GenerateWzMutableKey(WzIv);
+			WzKey = WzKeyGenerator.GenerateWzKey(WzIv);
 		}
 		#endregion
 
