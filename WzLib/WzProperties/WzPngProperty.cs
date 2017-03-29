@@ -299,6 +299,60 @@ namespace MapleLib.WzLib.WzProperties
                     Marshal.Copy(decBuf, 0, bmpData.Scan0, decBuf.Length);
                     bmp.UnlockBits(bmpData);
                     break;
+                case 3: // thanks to Elem8100 
+                    uncompressedSize = ((int)Math.Ceiling(width / 4.0)) * 4 * ((int)Math.Ceiling(height / 4.0)) * 4 / 8;
+                    decBuf = new byte[uncompressedSize];
+                    zlib.Read(decBuf, 0, uncompressedSize);
+                    bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                    int[] argb2 = new int[width * height];
+                    {
+                        int index;
+                        int index2;
+                        int p;
+                        int w = ((int)Math.Ceiling(width / 4.0));
+                        int h = ((int)Math.Ceiling(height / 4.0));
+                        for (int i = 0; i < h; i++)
+                        {
+                            for (int j = 0; j < w; j++)
+                            {
+                                index = (j + i * w) * 2; 
+                                index2 = j * 4 + i * width * 4; 
+                                p = (decBuf[index] & 0x0F) | ((decBuf[index] & 0x0F) << 4);
+                                p |= ((decBuf[index] & 0xF0) | ((decBuf[index] & 0xF0) >> 4)) << 8;
+                                p |= ((decBuf[index + 1] & 0x0F) | ((decBuf[index + 1] & 0x0F) << 4)) << 16;
+                                p |= ((decBuf[index + 1] & 0xF0) | ((decBuf[index] & 0xF0) >> 4)) << 24;
+
+                                for (int k = 0; k < 4; k++)
+                                {
+                                    if (x * 4 + k < width)
+                                    {
+                                        argb2[index2 + k] = p;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                            index2 = y * width * 4;
+                            for (int m = 1; m < 4; m++)
+                            {
+                                if (y * 4 + m < height)
+                                {
+                                    Array.Copy(argb2, index2, argb2, index2 + m * width, width);
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    bmpData = bmp.LockBits(new Rectangle(Point.Empty, bmp.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                    Marshal.Copy(argb2, 0, bmpData.Scan0, argb2.Length);
+                    bmp.UnlockBits(bmpData);
+                    break;
+                    
                 case 513:
                     bmp = new Bitmap(width, height, PixelFormat.Format16bppRgb565);
                     bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format16bppRgb565);
