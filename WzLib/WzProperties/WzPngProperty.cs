@@ -340,6 +340,17 @@ namespace MapleLib.WzLib.WzProperties
                     Marshal.Copy(decBuf, 0, bmpData.Scan0, decBuf.Length);
                     bmp.UnlockBits(bmpData);
                     break;
+                    
+                case 2050: // thanks to Elem8100
+                    bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                    bmpData = bmp.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                    uncompressedSize = width * height;
+                    decBuf = new byte[uncompressedSize];
+                    zlib.Read(decBuf, 0, uncompressedSize);
+                    decBuf = GetPixelDataDXT5(decBuf, Width, Height);
+                    Marshal.Copy(decBuf, 0, bmpData.Scan0, decBuf.Length);
+                    bmp.UnlockBits(bmpData);
+                    break;
 
                 default:
                     Helpers.ErrorLogger.Log(Helpers.ErrorLevel.MissingFeature, string.Format("Unknown PNG format {0} {1}", format, format2));
@@ -428,6 +439,81 @@ namespace MapleLib.WzLib.WzProperties
             }
 
             return pixel;
+        }
+        
+        public static byte[] GetPixelDataDXT5(byte[] rawData, int width, int height)
+        {
+            byte[] pixel = new byte[width * height * 4];
+
+            Color[] colorTable = new Color[4];
+            int[] colorIdxTable = new int[16];
+            byte[] alphaTable = new byte[8];
+            int[] alphaIdxTable = new int[16];
+            for (int y = 0; y < height; y += 4)
+            {
+                for (int x = 0; x < width; x += 4)
+                {
+                    int off = x * 4 + y * width;
+                    ExpandAlphaTableDXT5(alphaTable, rawData[off + 0], rawData[off + 1]);
+                    ExpandAlphaIndexTableDXT5(alphaIdxTable, rawData, off + 2);
+                    ushort u0 = BitConverter.ToUInt16(rawData, off + 8);
+                    ushort u1 = BitConverter.ToUInt16(rawData, off + 10);
+                    ExpandColorTable(colorTable, u0, u1);
+                    ExpandColorIndexTable(colorIdxTable, rawData, off + 12);
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            SetPixel(pixel,
+                                x + i,
+                                y + j,
+                                width,
+                                colorTable[colorIdxTable[j * 4 + i]],
+                                alphaTable[alphaIdxTable[j * 4 + i]]);
+                        }
+                    }
+                }
+            }
+
+            return pixel;
+        }
+
+        private static void ExpandAlphaTableDXT5(byte[] alpha, byte a0, byte a1)
+        {
+            alpha[0] = a0;
+            alpha[1] = a1;
+            if (a0 > a1)
+            {
+                for (int i = 2; i < 8; i++)
+                {
+                    alpha[i] = (byte)(((8 - i) * a0 + (i - 1) * a1 + 3) / 7);
+                }
+            }
+            else
+            {
+                for (int i = 2; i < 6; i++)
+                {
+                    alpha[i] = (byte)(((6 - i) * a0 + (i - 1) * a1 + 2) / 5);
+                }
+                alpha[6] = 0;
+                alpha[7] = 255;
+            }
+        }
+
+        private static void ExpandAlphaIndexTableDXT5(int[] alphaIndex, byte[] rawData, int offset)
+        {
+            for (int i = 0; i < 16; i += 8, offset += 3)
+            {
+                int flags = rawData[offset]
+                    | (rawData[offset + 1] << 8)
+                    | (rawData[offset + 2] << 16);
+                for (int j = 0; j < 8; j++)
+                {
+                    int mask = 0x07 << (3 * j);
+                    alphaIndex[i + j] = (flags & mask) >> (3 * j);
+                }
+            }
         }
 
         private static void SetPixel(byte[] pixelData, int x, int y, int width, Color color, byte alpha)
