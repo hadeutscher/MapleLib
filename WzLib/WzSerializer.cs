@@ -210,24 +210,29 @@ namespace MapleLib.WzLib.Serialization
         }
 
         // TODO: this is not deserializable due to missing type information
-        protected void WritePropertyToJson(TextWriter tw, WzImageProperty prop)
+        protected void WritePropertyToJson(TextWriter tw, WzImageProperty prop, bool isArray=false)
         {
+            tw.Write("\n");
             if (prop is WzCanvasProperty)
             {
                 WzCanvasProperty property = (WzCanvasProperty)prop;
+                if (!isArray)
+                {
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":");
+                }
                 if (ExportBase64Data)
                 {
                     MemoryStream stream = new MemoryStream();
                     property.PngProperty.GetPNG(false).Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                     byte[] pngbytes = stream.ToArray();
                     stream.Close();
-                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"{{" +
                         $"\"width\": {property.PngProperty.Width}, " +
                         $"\"height\": {property.PngProperty.Height}, " +
                         $"\"basedata\": {Convert.ToBase64String(pngbytes)}\",");
                 }
                 else
-                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"{{" +
                         $"\"width\": {property.PngProperty.Width}, " +
                         $"\"height\": {property.PngProperty.Height},");
                 if (property.WzProperties.Count() > 0)
@@ -263,14 +268,18 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzSoundProperty)
             {
                 WzSoundProperty property = (WzSoundProperty)prop;
+                if (!isArray)
+                {
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":");
+                }
                 if (ExportBase64Data)
-                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"{{" +
                         $"\"length\":\"{property.Length}\", " +
                         $"\"basehead\": \"{Convert.ToBase64String(property.Header)}\"" +
                         $"\"basedata\": \"{Convert.ToBase64String(property.GetBytes(false))}\"" +
                         $"}}");
                 else
-                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{}}");
+                    tw.Write("{}");
             }
             else if (prop is WzStringProperty)
             {
@@ -281,20 +290,29 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzSubProperty)
             {
                 WzSubProperty property = (WzSubProperty)prop;
-                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{");
+                if (!isArray)
+                {
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":");
+                }
+                // This has the same problem as the convex property
+                bool propertyIsArray = property.WzProperties.TrueForAll(x => { int num; return int.TryParse(x.Name, out num); });
+                tw.Write(propertyIsArray ? "[": "{");
                 if (property.WzProperties.Count() > 0)
                 {
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
-                        WritePropertyToJson(tw, p);
+                        bool isObject = p is WzConvexProperty || p is WzSubProperty || p is WzSoundProperty || p is WzCanvasProperty || p is WzVectorProperty;
+                        tw.Write(!isObject && propertyIsArray ? "{" : "");
+                        WritePropertyToJson(tw, p, propertyIsArray);
+                        tw.Write(!isObject && propertyIsArray ? "}" : "");
                         if (!p.Equals(last))
                         {
                             tw.Write(",");
                         }
                     }
                 }
-                tw.Write("}");
+                tw.Write(propertyIsArray ? "]" : "}");
             }
             else if (prop is WzShortProperty)
             {
@@ -314,7 +332,11 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzVectorProperty)
             {
                 WzVectorProperty property = (WzVectorProperty)prop;
-                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                if (!isArray)
+                {
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":");
+                }
+                tw.Write($"{{" +
                     $"\"x\": {property.X.Value}, " +
                     $"\"y\": {property.Y.Value}" +
                     $"}}");
@@ -326,16 +348,21 @@ namespace MapleLib.WzLib.Serialization
             }
             else if (prop is WzConvexProperty)
             {
-                tw.Write($"\"{XmlUtil.SanitizeText(prop.Name)}\":[");
                 WzConvexProperty property = (WzConvexProperty)prop;
+                if (!isArray)
+                {
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":");
+                }
+                tw.Write("[");
                 if (property.WzProperties.Count() > 0)
                 {
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
-                        tw.Write("{");
-                        WritePropertyToJson(tw, p);
-                        tw.Write("}");
+                        bool isObject = p is WzConvexProperty || p is WzSubProperty || p is WzSoundProperty || p is WzCanvasProperty || p is WzVectorProperty;
+                        tw.Write(isObject ? "" : "{");
+                        WritePropertyToJson(tw, p, true);
+                        tw.Write(isObject ? "" : "}");
                         if (!p.Equals(last))
                         {
                             tw.Write(",");
