@@ -26,6 +26,8 @@ using System.Globalization;
 using System.Xml;
 using System.Drawing;
 using System.Threading;
+using System.CodeDom;
+using Newtonsoft.Json;
 
 namespace MapleLib.WzLib.Serialization
 {
@@ -184,6 +186,175 @@ namespace MapleLib.WzLib.Serialization
                 foreach (WzImageProperty property in property14.WzProperties)
                     WritePropertyToXML(tw, newDepth, property);
                 tw.Write(depth + "</extended>" + lineBreak);
+            }
+        }
+    }
+
+    public abstract class IWzJsonSerializer : ProgressingWzSerializer
+    {
+        protected string indent;
+        protected string lineBreak;
+        public static NumberFormatInfo formattingInfo;
+        protected bool ExportBase64Data = false;
+
+        protected static char[] amp = "&amp;".ToCharArray();
+        protected static char[] lt = "&lt;".ToCharArray();
+        protected static char[] gt = "&gt;".ToCharArray();
+        protected static char[] apos = "&apos;".ToCharArray();
+        protected static char[] quot = "&quot;".ToCharArray();
+
+        static IWzJsonSerializer()
+        {
+            formattingInfo = new NumberFormatInfo();
+            formattingInfo.NumberDecimalSeparator = ".";
+            formattingInfo.NumberGroupSeparator = ",";
+        }
+
+        public IWzJsonSerializer(int indentation, LineBreak lineBreakType)
+        {
+            switch (lineBreakType)
+            {
+                case LineBreak.None:
+                    lineBreak = "";
+                    break;
+                case LineBreak.Windows:
+                    lineBreak = "\r\n";
+                    break;
+                case LineBreak.Unix:
+                    lineBreak = "\n";
+                    break;
+            }
+            char[] indentArray = new char[indentation];
+            for (int i = 0; i < indentation; i++)
+                indentArray[i] = (char)0x20;
+            indent = new string(indentArray);
+        }
+
+        // TODO: this is not deserializable due to missing type information
+        protected void WritePropertyToJson(TextWriter tw, string depth, WzImageProperty prop)
+        {
+            if (prop is WzCanvasProperty)
+            {
+                WzCanvasProperty property = (WzCanvasProperty)prop;
+                if (ExportBase64Data)
+                {
+                    MemoryStream stream = new MemoryStream();
+                    property.PngProperty.GetPNG(false).Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    byte[] pngbytes = stream.ToArray();
+                    stream.Close();
+                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                        $"\"width\":\"{property.PngProperty.Width}\", " +
+                        $"\"height\": {property.PngProperty.Height}, " +
+                        $"\"basedata\": {Convert.ToBase64String(pngbytes)}\"" +
+                        $"}}{lineBreak}");
+                }
+                else
+                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                        $"\"width\":\"{property.PngProperty.Width}\", " +
+                        $"\"height\": {property.PngProperty.Height}" +
+                        $"}}{lineBreak}");
+                string newDepth = depth + indent;
+                foreach (WzImageProperty p in property.WzProperties)
+                    WritePropertyToJson(tw, newDepth, p);
+            }
+            else if (prop is WzIntProperty)
+            {
+                WzIntProperty property = (WzIntProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+            }
+            else if (prop is WzDoubleProperty)
+            {
+                WzDoubleProperty property = (WzDoubleProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+            }
+            else if (prop is WzNullProperty)
+            {
+                WzNullProperty property = (WzNullProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": null");
+            }
+            else if (prop is WzSoundProperty)
+            {
+                WzSoundProperty property = (WzSoundProperty)prop;
+                if (ExportBase64Data)
+                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                        $"\"length\":\"{property.Length}\", " +
+                        $"\"basehead\": \"{Convert.ToBase64String(property.Header)}\"" +
+                        $"\"basedata\": \"{Convert.ToBase64String(property.GetBytes(false))}\"" +
+                        $"}}{lineBreak}");
+                else
+                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{}}{lineBreak}");
+            }
+            else if (prop is WzStringProperty)
+            {
+                WzStringProperty property = (WzStringProperty)prop;
+                string str = XmlUtil.SanitizeText(property.Value);
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": \"{str}\"");
+            }
+            else if (prop is WzSubProperty)
+            {
+                WzSubProperty property = (WzSubProperty)prop;
+                tw.Write(depth + $"\"{XmlUtil.SanitizeText(property.Name)}\":{{" + lineBreak);
+                string newDepth = depth + indent;
+                if (property.WzProperties.Count() > 0)
+                {
+                    var last = property.WzProperties.Last();
+                    foreach (WzImageProperty p in property.WzProperties)
+                    {
+                        WritePropertyToJson(tw, newDepth, p);
+                        if (!p.Equals(last))
+                        {
+                            tw.Write($",{lineBreak}");
+                        }
+                    }
+                }
+                tw.Write(depth + "}" + lineBreak);
+            }
+            else if (prop is WzShortProperty)
+            {
+                WzShortProperty property = (WzShortProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+            }
+            else if (prop is WzLongProperty)
+            {
+                WzLongProperty property = (WzLongProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+            }
+            else if (prop is WzUOLProperty)
+            {
+                WzUOLProperty property = (WzUOLProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+            }
+            else if (prop is WzVectorProperty)
+            {
+                WzVectorProperty property = (WzVectorProperty)prop;
+                tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    $"\"x\": {property.X.Value}, " +
+                    $"\"y\": {property.Y.Value}" +
+                    $"}}{lineBreak}");
+            }
+            else if (prop is WzFloatProperty)
+            {
+                WzFloatProperty property = (WzFloatProperty)prop;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value * 1.0}");
+            }
+            else if (prop is WzConvexProperty)
+            {
+                tw.Write($"{depth}\"{XmlUtil.SanitizeText(prop.Name)}\":[");
+                WzConvexProperty property = (WzConvexProperty)prop;
+                string newDepth = depth + indent;
+                if (property.WzProperties.Count() > 0)
+                {
+                    var last = property.WzProperties.Last();
+                    foreach (WzImageProperty p in property.WzProperties)
+                    {
+                        WritePropertyToJson(tw, newDepth, p);
+                        if (!p.Equals(last))
+                        {
+                            tw.Write($",{lineBreak}");
+                        }
+                    }
+                }
+                tw.Write(depth + "]" + lineBreak);
             }
         }
     }
@@ -414,6 +585,70 @@ namespace MapleLib.WzLib.Serialization
             }
             else if (currObj is WzUOLProperty)
                 ExportRecursion(((WzUOLProperty)currObj).LinkValue, outPath);
+        }
+    }
+
+    public class WzJsonSerializer : IWzJsonSerializer, IWzImageSerializer
+    {
+        public WzJsonSerializer(int indentation, LineBreak lineBreakType, bool exportbase64)
+            : base(indentation, lineBreakType)
+        { ExportBase64Data = exportbase64; }
+
+        private string pretty(string data)
+        {
+            return JsonConvert.SerializeObject(JsonConvert.DeserializeObject(data), Newtonsoft.Json.Formatting.Indented);
+        }
+
+        private void exportJsonInternal(WzImage img, string path)
+        {
+            bool parsed = img.Parsed || img.Changed;
+            if (!parsed) img.ParseImage();
+            curr++;
+            TextWriter tw = new StreamWriter(path);
+            tw.Write($"{{\"name\":\"{XmlUtil.SanitizeText(img.Name)}\",{lineBreak}" +
+                $"\"payload\":{{{lineBreak}");
+            var last = img.WzProperties.Last();
+            foreach (WzImageProperty p in img.WzProperties)
+            {
+                WritePropertyToJson(tw, indent, p);
+                if (!p.Equals(last))
+                {
+                    tw.Write($",{lineBreak}");
+                }
+            }
+            tw.Write("}}" + lineBreak);
+            tw.Close();
+            if (!parsed) img.UnparseImage();
+            //File.WriteAllText(path, pretty(File.ReadAllText(path)));
+
+        }
+
+        private void exportDirJsonInternal(WzDirectory dir, string path)
+        {
+            if (!Directory.Exists(path)) createDirSafe(ref path);
+            if (path.Substring(path.Length - 1) != @"\") path += @"\";
+            foreach (WzDirectory subdir in dir.WzDirectories)
+                exportDirJsonInternal(subdir, path + subdir.name + @"\");
+            foreach (WzImage subimg in dir.WzImages)
+                exportJsonInternal(subimg, path + subimg.Name + ".json");
+        }
+
+        public void SerializeImage(WzImage img, string path)
+        {
+            total = 1; curr = 0;
+            if (Path.GetExtension(path) != ".xml") path += ".xml";
+            exportJsonInternal(img, path);
+        }
+
+        public void SerializeDirectory(WzDirectory dir, string path)
+        {
+            total = dir.CountImages(); curr = 0;
+            exportDirJsonInternal(dir, path);
+        }
+
+        public void SerializeFile(WzFile file, string path)
+        {
+            SerializeDirectory(file.WzDirectory, path);
         }
     }
 
