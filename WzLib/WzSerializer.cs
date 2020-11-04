@@ -243,19 +243,29 @@ namespace MapleLib.WzLib.Serialization
                     byte[] pngbytes = stream.ToArray();
                     stream.Close();
                     tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
-                        $"\"width\":\"{property.PngProperty.Width}\", " +
+                        $"\"width\": {property.PngProperty.Width}, " +
                         $"\"height\": {property.PngProperty.Height}, " +
-                        $"\"basedata\": {Convert.ToBase64String(pngbytes)}\"" +
-                        $"}}{lineBreak}");
+                        $"\"basedata\": {Convert.ToBase64String(pngbytes)}\",");
                 }
                 else
                     tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
-                        $"\"width\":\"{property.PngProperty.Width}\", " +
-                        $"\"height\": {property.PngProperty.Height}" +
-                        $"}}{lineBreak}");
+                        $"\"width\": {property.PngProperty.Width}, " +
+                        $"\"height\": {property.PngProperty.Height},");
                 string newDepth = depth + indent;
-                foreach (WzImageProperty p in property.WzProperties)
-                    WritePropertyToJson(tw, newDepth, p);
+                if (property.WzProperties.Count() > 0)
+                {
+                    var last = property.WzProperties.Last();
+                    foreach (WzImageProperty p in property.WzProperties)
+                    {
+                        WritePropertyToJson(tw, newDepth, p);
+                        if (!p.Equals(last))
+                        {
+                            tw.Write($",{lineBreak}");
+                        }
+                    }
+                }
+                tw.Write($"}}{lineBreak}");
+
             }
             else if (prop is WzIntProperty)
             {
@@ -322,7 +332,7 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzUOLProperty)
             {
                 WzUOLProperty property = (WzUOLProperty)prop;
-                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": {property.Value}");
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\": \"{property.Value}\"");
             }
             else if (prop is WzVectorProperty)
             {
@@ -347,7 +357,9 @@ namespace MapleLib.WzLib.Serialization
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
+                        tw.Write("{");
                         WritePropertyToJson(tw, newDepth, p);
+                        tw.Write("}");
                         if (!p.Equals(last))
                         {
                             tw.Write($",{lineBreak}");
@@ -619,7 +631,7 @@ namespace MapleLib.WzLib.Serialization
             tw.Write("}}" + lineBreak);
             tw.Close();
             if (!parsed) img.UnparseImage();
-            //File.WriteAllText(path, pretty(File.ReadAllText(path)));
+            File.WriteAllText(path, pretty(File.ReadAllText(path)));
 
         }
 
