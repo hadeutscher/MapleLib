@@ -192,8 +192,7 @@ namespace MapleLib.WzLib.Serialization
 
     public abstract class IWzJsonSerializer : ProgressingWzSerializer
     {
-        protected string indent;
-        protected string lineBreak;
+
         public static NumberFormatInfo formattingInfo;
         protected bool ExportBase64Data = false;
 
@@ -210,28 +209,8 @@ namespace MapleLib.WzLib.Serialization
             formattingInfo.NumberGroupSeparator = ",";
         }
 
-        public IWzJsonSerializer(int indentation, LineBreak lineBreakType)
-        {
-            switch (lineBreakType)
-            {
-                case LineBreak.None:
-                    lineBreak = "";
-                    break;
-                case LineBreak.Windows:
-                    lineBreak = "\r\n";
-                    break;
-                case LineBreak.Unix:
-                    lineBreak = "\n";
-                    break;
-            }
-            char[] indentArray = new char[indentation];
-            for (int i = 0; i < indentation; i++)
-                indentArray[i] = (char)0x20;
-            indent = new string(indentArray);
-        }
-
         // TODO: this is not deserializable due to missing type information
-        protected void WritePropertyToJson(TextWriter tw, string depth, WzImageProperty prop)
+        protected void WritePropertyToJson(TextWriter tw, WzImageProperty prop)
         {
             if (prop is WzCanvasProperty)
             {
@@ -242,29 +221,28 @@ namespace MapleLib.WzLib.Serialization
                     property.PngProperty.GetPNG(false).Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                     byte[] pngbytes = stream.ToArray();
                     stream.Close();
-                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
                         $"\"width\": {property.PngProperty.Width}, " +
                         $"\"height\": {property.PngProperty.Height}, " +
                         $"\"basedata\": {Convert.ToBase64String(pngbytes)}\",");
                 }
                 else
-                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
                         $"\"width\": {property.PngProperty.Width}, " +
                         $"\"height\": {property.PngProperty.Height},");
-                string newDepth = depth + indent;
                 if (property.WzProperties.Count() > 0)
                 {
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
-                        WritePropertyToJson(tw, newDepth, p);
+                        WritePropertyToJson(tw, p);
                         if (!p.Equals(last))
                         {
-                            tw.Write($",{lineBreak}");
+                            tw.Write(",");
                         }
                     }
                 }
-                tw.Write($"}}{lineBreak}");
+                tw.Write("}");
 
             }
             else if (prop is WzIntProperty)
@@ -286,13 +264,13 @@ namespace MapleLib.WzLib.Serialization
             {
                 WzSoundProperty property = (WzSoundProperty)prop;
                 if (ExportBase64Data)
-                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
                         $"\"length\":\"{property.Length}\", " +
                         $"\"basehead\": \"{Convert.ToBase64String(property.Header)}\"" +
                         $"\"basedata\": \"{Convert.ToBase64String(property.GetBytes(false))}\"" +
-                        $"}}{lineBreak}");
+                        $"}}");
                 else
-                    tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{}}{lineBreak}");
+                    tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{}}");
             }
             else if (prop is WzStringProperty)
             {
@@ -303,21 +281,20 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzSubProperty)
             {
                 WzSubProperty property = (WzSubProperty)prop;
-                tw.Write(depth + $"\"{XmlUtil.SanitizeText(property.Name)}\":{{" + lineBreak);
-                string newDepth = depth + indent;
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{");
                 if (property.WzProperties.Count() > 0)
                 {
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
-                        WritePropertyToJson(tw, newDepth, p);
+                        WritePropertyToJson(tw, p);
                         if (!p.Equals(last))
                         {
-                            tw.Write($",{lineBreak}");
+                            tw.Write(",");
                         }
                     }
                 }
-                tw.Write(depth + "}" + lineBreak);
+                tw.Write("}");
             }
             else if (prop is WzShortProperty)
             {
@@ -337,10 +314,10 @@ namespace MapleLib.WzLib.Serialization
             else if (prop is WzVectorProperty)
             {
                 WzVectorProperty property = (WzVectorProperty)prop;
-                tw.Write($"{depth}\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
+                tw.Write($"\"{XmlUtil.SanitizeText(property.Name)}\":{{" +
                     $"\"x\": {property.X.Value}, " +
                     $"\"y\": {property.Y.Value}" +
-                    $"}}{lineBreak}");
+                    $"}}");
             }
             else if (prop is WzFloatProperty)
             {
@@ -349,24 +326,23 @@ namespace MapleLib.WzLib.Serialization
             }
             else if (prop is WzConvexProperty)
             {
-                tw.Write($"{depth}\"{XmlUtil.SanitizeText(prop.Name)}\":[");
+                tw.Write($"\"{XmlUtil.SanitizeText(prop.Name)}\":[");
                 WzConvexProperty property = (WzConvexProperty)prop;
-                string newDepth = depth + indent;
                 if (property.WzProperties.Count() > 0)
                 {
                     var last = property.WzProperties.Last();
                     foreach (WzImageProperty p in property.WzProperties)
                     {
                         tw.Write("{");
-                        WritePropertyToJson(tw, newDepth, p);
+                        WritePropertyToJson(tw, p);
                         tw.Write("}");
                         if (!p.Equals(last))
                         {
-                            tw.Write($",{lineBreak}");
+                            tw.Write(",");
                         }
                     }
                 }
-                tw.Write(depth + "]" + lineBreak);
+                tw.Write("]");
             }
         }
     }
@@ -602,8 +578,7 @@ namespace MapleLib.WzLib.Serialization
 
     public class WzJsonSerializer : IWzJsonSerializer, IWzImageSerializer
     {
-        public WzJsonSerializer(int indentation, LineBreak lineBreakType, bool exportbase64)
-            : base(indentation, lineBreakType)
+        public WzJsonSerializer(bool exportbase64): base()
         { ExportBase64Data = exportbase64; }
 
         private string pretty(string data)
@@ -617,18 +592,18 @@ namespace MapleLib.WzLib.Serialization
             if (!parsed) img.ParseImage();
             curr++;
             TextWriter tw = new StreamWriter(path);
-            tw.Write($"{{\"name\":\"{XmlUtil.SanitizeText(img.Name)}\",{lineBreak}" +
-                $"\"payload\":{{{lineBreak}");
+            tw.Write($"{{\"name\":\"{XmlUtil.SanitizeText(img.Name)}\"," +
+                $"\"payload\":{{");
             var last = img.WzProperties.Last();
             foreach (WzImageProperty p in img.WzProperties)
             {
-                WritePropertyToJson(tw, indent, p);
+                WritePropertyToJson(tw, p);
                 if (!p.Equals(last))
                 {
-                    tw.Write($",{lineBreak}");
+                    tw.Write(",");
                 }
             }
-            tw.Write("}}" + lineBreak);
+            tw.Write("}}");
             tw.Close();
             if (!parsed) img.UnparseImage();
             File.WriteAllText(path, pretty(File.ReadAllText(path)));
